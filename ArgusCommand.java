@@ -1,7 +1,8 @@
 package argusTerminal;
 
 import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
@@ -9,27 +10,27 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import basicTerminal.BasicUserControlPanel;
-
-public class ArgusCommand extends BasicUserControlPanel {
+public class ArgusCommand extends BasicUserControlPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	protected ArgusTerminal argusTerminal;
 	protected StringBuffer stringBuffer;
-	public int length=5;
-	JTextField text = new JTextField("");
-	JLabel label = new JLabel();
+	int len=0;
+	JTextField[] text = new JTextField[100];
+	String cOut = null;
 	public static final String commandFile = "argusTerminal/ArgusCommands.argus";
 
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Argus Command");
-		jf.setSize(250, 728);
+		jf.pack();
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ArgusCommand ac = new ArgusCommand();
 		jf.getContentPane().add(ac);
@@ -86,6 +87,7 @@ public class ArgusCommand extends BasicUserControlPanel {
 		stringBuffer = new StringBuffer();
 		//Create Buttons
 		JPanel bPanel = new JPanel();
+		Box con = Box.createVerticalBox();
 		try{
 			//Reads Commands.txt
 
@@ -96,29 +98,39 @@ public class ArgusCommand extends BasicUserControlPanel {
 			String line;
 			while((line = br.readLine()) != null){
 
-				String name = Title(line);
-				JButton button = new JButton(name);
-				button.addActionListener(this);	
-				bPanel.add(button);
-				length++;
+				Box bRow = Box.createHorizontalBox();
+				
+				String name = line.substring(0, check(line, "~"));
+				JButton send = new JButton("Send"+name);
+				send.setMinimumSize(new Dimension(72, 30));
+				send.setPreferredSize(new Dimension(72, 30));
+				send.setMaximumSize(new Dimension(72, 30));
+				send.addActionListener(this);
+				bRow.add(send);
+				
+				JLabel label = new JLabel("     "+name);
+				bRow.add(label);
+				label.setPreferredSize(new Dimension(190,25));
+				
+				if (check(line, "^") != 0){
+				
+					text[len] = new JTextField();
+					bRow.add(text[len]);
+					text[len].setPreferredSize(new Dimension(100, 25));
+					
+					JLabel parameter = new JLabel();
+					bRow.add(parameter);
+					String explain = parExp(line);
+					parameter.setText(explain);
+				}
+				
+				bRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+				
+				con.add(bRow);
+				
+				len++;
 			}
-
-			//Creates default menu items
-
-			bPanel.add(text);
-			bPanel.add(label);
-
-			JButton enter = new JButton("Enter");
-			enter.addActionListener(this);	
-			bPanel.add(enter);
-
-			JButton send = new JButton("Send");
-			send.addActionListener(this);	
-			bPanel.add(send);
-
-			JButton cancel = new JButton("Cancel");
-			cancel.addActionListener(this);	
-			bPanel.add(cancel);
+			
 
 			br.close();
 		} catch (FileNotFoundException fnffe){
@@ -126,21 +138,61 @@ public class ArgusCommand extends BasicUserControlPanel {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		//Size of buttons determined by number of commands
-		bPanel.setLayout(new GridLayout(length, 1));
+		
+		Box fill = Box.createHorizontalBox();
+		fill.setMinimumSize(new Dimension(0,10));
+		fill.setPreferredSize(new Dimension(0,10));
+		fill.setMaximumSize(new Dimension(0,10));
+		con.add(fill);
+		
+		//Creates custom commands field
+		
+		Box custom = Box.createHorizontalBox();
+		JButton send = new JButton("SendCustom");
+		send.addActionListener(this);
+		send.setMinimumSize(new Dimension(72, 30));
+		send.setPreferredSize(new Dimension(72, 30));
+		send.setMaximumSize(new Dimension(72, 30));
+		custom.add(send);
+		JLabel label = new JLabel();
+		custom.add(label);
+		label.setMinimumSize(new Dimension(190,25));
+		label.setPreferredSize(new Dimension(190,25));
+		label.setText("     Input New Command: ");
+		text[99] = new JTextField();
+		custom.add(text[99]);
+		custom.setAlignmentX(Component.LEFT_ALIGNMENT);
+		
+		con.add(custom);
+		
+		bPanel.setLayout(new BorderLayout());
+		bPanel.add(con, BorderLayout.WEST);
+		
 		bPanel.setVisible(true);
-		add(bPanel, BorderLayout.CENTER);
 	}
 
-	//Parses line to find Command Title (Displays on button)
-
-	static String Title(String line){
-
-		String title = null;
-
+	static int check(String line, String sym){
+		
 		for(int i=0; i<line.length(); i++){
-			if (line.substring(i, i+1).equals("~")){
-				title = line.substring(0,i);
+			if (line.substring(i, i+1).equals(sym)){
+				return i;
+			}
+		}
+		return 0;
+	}
+	
+	static String parExp(String line){
+		
+		String title = null;
+		int j;
+		
+		for(int i=0; i<line.length(); i++){
+			if (line.substring(i, i+1).equals("^")){
+				if ((j = check(line, "#")) != 0){				
+					title = line.substring(i+1, j);
+				}else{
+					title = line.substring(i+1, line.length());
+				}
 			}
 		}
 		return title;
@@ -151,26 +203,14 @@ public class ArgusCommand extends BasicUserControlPanel {
 	public void actionPerformed(ActionEvent aEvent) {
 		super.actionPerformed(aEvent);
 		String name = aEvent.getActionCommand();
+		int count = 0, title, par, che;
 
 		//Detects if a default button is pressed
 
-		if(name.equals("Enter")){
-			String type = text.getText();
-			label.setText(type);
-		}else if(name.equals("Send")){
-			if(!label.getText().equals("")){
-
+		if(name.substring(4, name.length()).equals("Custom"){
 				//Replace "System.out..." with the output to the radio
-				send(label.getText());
-				label.setText("");
-			}
-		}else if(name.equals("Cancel")){
-			text.setText("");
-			label.setText("");
+				send(text[99].getText());
 		}else{
-
-			//Reads Commands.txt
-
 			try {
 				BufferedReader commands = new BufferedReader(new FileReader(commandFile));
 
@@ -178,14 +218,32 @@ public class ArgusCommand extends BasicUserControlPanel {
 
 				String in;
 				while((in = commands.readLine()) != null){
-
-					for(int i=0; i<in.length(); i++){
-						if (in.substring(i, i+1).equals("~")){
-							if(in.substring(0,i).equals(name)){
-								text.setText(in.substring(i+1, in.length()));
+					if ((title = check(in, "~")) != 0){
+						if(in.substring(0,title).equals(name.substring(4, name.length()))){
+							if((par = check(in, "^")) != 0){
+								if ((che = check(in, "#")) != 0){
+									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[count].getText(), "Confirm", JOptionPane.YES_NO_OPTION);
+									if(response == JOptionPane.YES_OPTION){	
+										System.out.println(in.substring(title+1, par)+text[count].getText());
+									}
+								}else{
+									System.out.println(in.substring(title+1, par)+text[count].getText());
+								}
+								break;
+							}else{
+								if((che = check(in, "#")) != 0){
+									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION);
+									if(response == JOptionPane.YES_OPTION){	
+										System.out.println(in.substring(title+1, che));
+									}
+								}else{
+									System.out.println(in.substring(title+1, in.length()));
+								}
+								break;
 							}
 						}
 					}
+				count++;
 				}
 
 				commands.close();
