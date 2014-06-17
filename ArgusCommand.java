@@ -148,8 +148,9 @@ public class ArgusCommand extends BasicUserControlPanel {
 
 	//Activates when button is pressed
 
-	public void actionPerformed(ActionEvent arg0) {
-		String name = arg0.getActionCommand();
+	public void actionPerformed(ActionEvent aEvent) {
+		super.actionPerformed(aEvent);
+		String name = aEvent.getActionCommand();
 
 		//Detects if a default button is pressed
 
