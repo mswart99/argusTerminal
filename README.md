@@ -21,8 +21,8 @@ II. ArgusCommand.java
 
 III. ArgusCommands.argus
 
-* ~ Separates the Title of the Command from the Command itself
+* "~" Separates the Title of the Command from the Command itself
 
-* ^ Separates the Command from the Parameter Explanation
+* "^" Separates the Command from the Parameter Explanation
 
-* # Denotes if a Command requires a Confirm Window
+* "#" Denotes if a Command requires a Confirm Window
