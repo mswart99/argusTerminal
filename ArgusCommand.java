@@ -6,6 +6,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import mas.utils.Utils;
 import basicTerminal.BasicUserControlPanel;
 
 public class ArgusCommand extends BasicUserControlPanel implements ActionListener {
@@ -28,26 +30,37 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	int len=0;
 	JTextField[] text = new JTextField[100];
 	String cOut = null;
-	public static final String commandFile = "argusTerminal/ArgusCommands.argus";
+	public static final String[] commandFile = {
+		"argusTerminal/ArgusCommands.argus",
+		"ArgusCommands.argus"
+	};
 
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Argus Command");
 		jf.pack();
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		ArgusCommand ac = new ArgusCommand();
+		ArgusCommand ac = new ArgusCommand(null);
 		jf.getContentPane().add(ac);
 		jf.setVisible(true);
+		jf.pack();
 	}
 
-	public ArgusCommand() {
-		super(null);
-		init();
-	}
-	
 	public ArgusCommand(ArgusTerminal at) {
 		super(at);
 		argusTerminal = at;
 		init();
+	}
+	
+	public void message(String text, boolean makeBold) {
+		if (argusTerminal == null) {
+			System.out.println(text);
+		} else {
+			argusTerminal.message(text, makeBold);
+		}
+	}
+	
+	public void message(String text) {
+		message(text, false);
 	}
 	
 	/** StringBuffers are used in send() in the foolish attempt to manage
@@ -84,16 +97,33 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		}
 	}
 	
+	private BufferedReader tryToOpenCommandFile() {
+		BufferedReader br;
+		for (int i=0; i < commandFile.length; i++) {
+			try {
+				br = new BufferedReader(new FileReader(commandFile[i]));
+				return(br);
+			} catch (FileNotFoundException fnfe) {
+				// Do nothing. Try the next one
+			}
+		}
+		// The file is not where it should be
+		File f = new File("");
+		System.err.println("Could not find any config file: " + 
+				Utils.arrayToStringBuffer(commandFile));
+		System.err.println("Did you move the config file to this directory " + f.getAbsolutePath());
+		return(null);
+	}
+	
 	private void init() {
 		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
 		//Create Buttons
-		JPanel bPanel = new JPanel();
 		Box con = Box.createVerticalBox();
 		try{
 			//Reads Commands.txt
 
-			BufferedReader br = new BufferedReader(new FileReader(commandFile));
+			BufferedReader br = tryToOpenCommandFile();
 
 			//Uses Commands.txt to create new buttons
 
@@ -136,8 +166,6 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 			
 
 			br.close();
-		} catch (FileNotFoundException fnffe){
-			message("Could not find config file: " + commandFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -168,10 +196,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		
 		con.add(custom);
 		
-		bPanel.setLayout(new BorderLayout());
-		bPanel.add(con, BorderLayout.WEST);
-		
-		bPanel.setVisible(true);
+		add(con, BorderLayout.CENTER);
 	}
 
 	static int check(String line, String sym){
@@ -214,7 +239,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 			}
 		}else{
 			try {
-				BufferedReader commands = new BufferedReader(new FileReader(commandFile));
+				BufferedReader commands = tryToOpenCommandFile();
 
 				//Searches Commands.txt to find selected Title and outputs equivalent Command
 
@@ -226,20 +251,20 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 								if ((che = check(in, "#")) != 0){
 									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[count].getText(), "Confirm", JOptionPane.YES_NO_OPTION);
 									if(response == JOptionPane.YES_OPTION){	
-										System.out.println(in.substring(title+1, par)+text[count].getText());
+										send(in.substring(title+1, par)+text[count].getText());
 									}
 								}else{
-									System.out.println(in.substring(title+1, par)+text[count].getText());
+									send(in.substring(title+1, par)+text[count].getText());
 								}
 								break;
 							}else{
 								if((che = check(in, "#")) != 0){
 									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION);
 									if(response == JOptionPane.YES_OPTION){	
-										System.out.println(in.substring(title+1, che));
+										send(in.substring(title+1, che));
 									}
 								}else{
-									System.out.println(in.substring(title+1, in.length()));
+									send(in.substring(title+1, in.length()));
 								}
 								break;
 							}
@@ -249,8 +274,6 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				}
 
 				commands.close();
-			} catch (FileNotFoundException fnfe){
-				message("Could not find config file: " + commandFile);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
