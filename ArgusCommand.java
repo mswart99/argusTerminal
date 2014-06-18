@@ -112,18 +112,19 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				
 				JLabel label = new JLabel("     "+name);
 				bRow.add(label);
+				label.setMinimumSize(new Dimension(190,25));
 				label.setPreferredSize(new Dimension(190,25));
+				label.setMaximumSize(new Dimension(190,25));
 				
 				if (check(line, "^") != 0){
 				
 					text[len] = new JTextField();
 					bRow.add(text[len]);
-					text[len].setPreferredSize(new Dimension(100, 25));
+					text[len].setMaximumSize(new Dimension(100, 25));
 					
 					JLabel parameter = new JLabel();
 					bRow.add(parameter);
-					String explain = parExp(line);
-					parameter.setText(explain);
+					parameter.setText("   " + parExp(line));
 				}
 				
 				bRow.setAlignmentX(Component.LEFT_ALIGNMENT);
