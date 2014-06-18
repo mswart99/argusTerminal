@@ -18,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import basicTerminal.BasicUserControlPanel;
+
 public class ArgusCommand extends BasicUserControlPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
