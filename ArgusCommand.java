@@ -187,15 +187,13 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	static String parExp(String line){
 		
 		String title = null;
-		int j;
+		int i, j;
 		
-		for(int i=0; i<line.length(); i++){
-			if (line.substring(i, i+1).equals("^")){
-				if ((j = check(line, "#")) != 0){				
-					title = line.substring(i+1, j);
-				}else{
-					title = line.substring(i+1, line.length());
-				}
+		if ((i = check(line, "^") != 0){
+			if ((j = check(line, "#")) != 0){				
+				title = line.substring(i+1, j);
+			}else{
+				title = line.substring(i+1, line.length());
 			}
 		}
 		return title;
