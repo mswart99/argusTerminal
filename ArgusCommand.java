@@ -206,10 +206,11 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		int count = 0, title, par, che;
 
 		//Detects if a default button is pressed
-
-		if(name.substring(4, name.length()).equals("Custom"){
-				//Replace "System.out..." with the output to the radio
+		if(name.substring(4, name.length()).equals("Custom") && !(text[99].getText().equals(""))){
+			int response = JOptionPane.showConfirmDialog(null, "Send: "+text[99].getText(), "Confirm", JOptionPane.YES_NO_OPTION);
+			if(response == JOptionPane.YES_OPTION){	
 				send(text[99].getText());
+			}
 		}else{
 			try {
 				BufferedReader commands = new BufferedReader(new FileReader(commandFile));
