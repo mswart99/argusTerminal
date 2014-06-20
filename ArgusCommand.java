@@ -16,7 +16,6 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import mas.utils.Utils;
@@ -27,9 +26,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	private static final long serialVersionUID = 1L;
 	protected ArgusTerminal argusTerminal;
 	protected StringBuffer stringBuffer;
-	int len=0;
 	JTextField[] text = new JTextField[100];
-	String cOut = null;
 	public static final String[] commandFile = {
 		"argusTerminal/ArgusCommands.argus",
 		"ArgusCommands.argus"
@@ -37,7 +34,6 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Argus Command");
-		jf.pack();
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ArgusCommand ac = new ArgusCommand(null);
 		jf.getContentPane().add(ac);
@@ -118,39 +114,32 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	private void init() {
 		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
-		//Create Buttons
 		Box con = Box.createVerticalBox();
 		try{
-			//Reads Commands.txt
-
 			BufferedReader br = tryToOpenCommandFile();
 
-			//Uses Commands.txt to create new buttons
-
 			String line;
-			while((line = br.readLine()) != null){
+			for(int i=0; (line = br.readLine()) != null; i++){
 
 				Box bRow = Box.createHorizontalBox();
 				
 				String name = line.substring(0, check(line, "~"));
 				JButton send = new JButton("Send"+name);
-				send.setMinimumSize(new Dimension(72, 30));
 				send.setPreferredSize(new Dimension(72, 30));
 				send.setMaximumSize(new Dimension(72, 30));
 				send.addActionListener(this);
 				bRow.add(send);
 				
 				JLabel label = new JLabel("     "+name);
-				bRow.add(label);
-				label.setMinimumSize(new Dimension(190,25));
 				label.setPreferredSize(new Dimension(190,25));
 				label.setMaximumSize(new Dimension(190,25));
+				bRow.add(label);
 				
 				if (check(line, "^") != 0){
 				
-					text[len] = new JTextField();
-					bRow.add(text[len]);
-					text[len].setMaximumSize(new Dimension(100, 25));
+					text[i] = new JTextField();
+					bRow.add(text[i]);
+					text[i].setMaximumSize(new Dimension(125, 35));
 					
 					JLabel parameter = new JLabel();
 					bRow.add(parameter);
@@ -158,10 +147,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				}
 				
 				bRow.setAlignmentX(Component.LEFT_ALIGNMENT);
-				
 				con.add(bRow);
-				
-				len++;
 			}
 			
 
@@ -171,30 +157,28 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		}
 		
 		Box fill = Box.createHorizontalBox();
-		fill.setMinimumSize(new Dimension(0,10));
 		fill.setPreferredSize(new Dimension(0,10));
 		fill.setMaximumSize(new Dimension(0,10));
 		con.add(fill);
 		
-		//Creates custom commands field
-		
-		Box custom = Box.createHorizontalBox();
+		/*Box custom = Box.createHorizontalBox();
 		JButton send = new JButton("SendCustom");
 		send.addActionListener(this);
-		send.setMinimumSize(new Dimension(72, 30));
 		send.setPreferredSize(new Dimension(72, 30));
 		send.setMaximumSize(new Dimension(72, 30));
 		custom.add(send);
+		
 		JLabel label = new JLabel();
 		custom.add(label);
 		label.setMinimumSize(new Dimension(190,25));
 		label.setPreferredSize(new Dimension(190,25));
 		label.setText("     Input New Command: ");
+		
 		text[99] = new JTextField();
 		custom.add(text[99]);
 		custom.setAlignmentX(Component.LEFT_ALIGNMENT);
 		
-		con.add(custom);
+		con.add(custom);*/
 		
 		add(con, BorderLayout.CENTER);
 	}
@@ -214,7 +198,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		String title = null;
 		int i, j;
 		
-		if ((i = check(line, "^") != 0){
+		if ((i = check(line, "^")) != 0){
 			if ((j = check(line, "#")) != 0){				
 				title = line.substring(i+1, j);
 			}else{
@@ -229,54 +213,45 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	public void actionPerformed(ActionEvent aEvent) {
 		super.actionPerformed(aEvent);
 		String name = aEvent.getActionCommand();
-		int count = 0, title, par, che;
+		int title, par, che;
 
-		//Detects if a default button is pressed
-		if(name.substring(4, name.length()).equals("Custom") && !(text[99].getText().equals(""))){
-			int response = JOptionPane.showConfirmDialog(null, "Send: "+text[99].getText(), "Confirm", JOptionPane.YES_NO_OPTION);
-			if(response == JOptionPane.YES_OPTION){	
+		/*if(name.substring(4, name.length()).equals("Custom") && !(text[99].getText().equals(""))){
+			if(JOptionPane.showConfirmDialog(null, "Send: "+text[99].getText(), "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
 				send(text[99].getText());
 			}
-		}else{
+		}else{*/
 			try {
 				BufferedReader commands = tryToOpenCommandFile();
 
-				//Searches Commands.txt to find selected Title and outputs equivalent Command
-
 				String in;
-				while((in = commands.readLine()) != null){
-					if ((title = check(in, "~")) != 0){
-						if(in.substring(0,title).equals(name.substring(4, name.length()))){
-							if((par = check(in, "^")) != 0){
-								if ((che = check(in, "#")) != 0){
-									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[count].getText(), "Confirm", JOptionPane.YES_NO_OPTION);
-									if(response == JOptionPane.YES_OPTION){	
-										send(in.substring(title+1, par)+text[count].getText());
-									}
-								}else{
-									send(in.substring(title+1, par)+text[count].getText());
-								}
-								break;
+				for(int i=0; (in=commands.readLine())!=null; i++){
+					if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name.substring(4,name.length()))){
+						if((par = check(in, "^")) != 0){
+							if (((che = check(in, "#")) != 0) &&
+								JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[i].getText(), "Confirm", JOptionPane.YES_NO_OPTION)
+								== JOptionPane.YES_OPTION){	
+									send(in.substring(title+1, par)+text[i].getText());
 							}else{
-								if((che = check(in, "#")) != 0){
-									int response = JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION);
-									if(response == JOptionPane.YES_OPTION){	
-										send(in.substring(title+1, che));
-									}
-								}else{
-									send(in.substring(title+1, in.length()));
-								}
-								break;
+								send(in.substring(title+1, par)+text[i].getText());
 							}
+							break;
+						}else{
+							if(((che = check(in, "#")) != 0) &&
+								JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION)
+								== JOptionPane.YES_OPTION){	
+									send(in.substring(title+1, che));	
+							}else{
+								send(in.substring(title+1, in.length()));
+							}
+							break;
 						}
 					}
-				count++;
 				}
 
 				commands.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}
+		//}
 	}
 }
