@@ -1,6 +1,7 @@
 package argusTerminal;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -147,6 +148,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				}
 				
 				bRow.setAlignmentX(Component.LEFT_ALIGNMENT);
+				bRow.setBackground(Color.darkGray);
 				con.add(bRow);
 			}
 			
@@ -155,30 +157,6 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		
-		Box fill = Box.createHorizontalBox();
-		fill.setPreferredSize(new Dimension(0,10));
-		fill.setMaximumSize(new Dimension(0,10));
-		con.add(fill);
-		
-		/*Box custom = Box.createHorizontalBox();
-		JButton send = new JButton("SendCustom");
-		send.addActionListener(this);
-		send.setPreferredSize(new Dimension(72, 30));
-		send.setMaximumSize(new Dimension(72, 30));
-		custom.add(send);
-		
-		JLabel label = new JLabel();
-		custom.add(label);
-		label.setMinimumSize(new Dimension(190,25));
-		label.setPreferredSize(new Dimension(190,25));
-		label.setText("     Input New Command: ");
-		
-		text[99] = new JTextField();
-		custom.add(text[99]);
-		custom.setAlignmentX(Component.LEFT_ALIGNMENT);
-		
-		con.add(custom);*/
 		
 		add(con, BorderLayout.CENTER);
 	}
@@ -214,44 +192,37 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		super.actionPerformed(aEvent);
 		String name = aEvent.getActionCommand();
 		int title, par, che;
+		try {
+			BufferedReader commands = tryToOpenCommandFile();
 
-		/*if(name.substring(4, name.length()).equals("Custom") && !(text[99].getText().equals(""))){
-			if(JOptionPane.showConfirmDialog(null, "Send: "+text[99].getText(), "Confirm", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION){
-				send(text[99].getText());
-			}
-		}else{*/
-			try {
-				BufferedReader commands = tryToOpenCommandFile();
-
-				String in;
-				for(int i=0; (in=commands.readLine())!=null; i++){
-					if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name.substring(4,name.length()))){
-						if((par = check(in, "^")) != 0){
-							if (((che = check(in, "#")) != 0) &&
-								JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[i].getText(), "Confirm", JOptionPane.YES_NO_OPTION)
-								== JOptionPane.YES_OPTION){	
-									send(in.substring(title+1, par)+text[i].getText());
-							}else{
+			String in;
+			for(int i=0; (in=commands.readLine())!=null; i++){
+				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name.substring(4,name.length()))){
+					if((par = check(in, "^")) != 0){
+						if (((che = check(in, "#")) != 0) &&
+							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[i].getText(), "Confirm", JOptionPane.YES_NO_OPTION)
+							== JOptionPane.YES_OPTION){	
 								send(in.substring(title+1, par)+text[i].getText());
-							}
-							break;
 						}else{
-							if(((che = check(in, "#")) != 0) &&
-								JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION)
-								== JOptionPane.YES_OPTION){	
-									send(in.substring(title+1, che));	
-							}else{
-								send(in.substring(title+1, in.length()));
-							}
-							break;
+							send(in.substring(title+1, par)+text[i].getText());
 						}
+						break;
+					}else{
+						if(((che = check(in, "#")) != 0) &&
+							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION)
+							== JOptionPane.YES_OPTION){	
+								send(in.substring(title+1, che));	
+						}else{
+							send(in.substring(title+1, in.length()));
+						}
+						break;
 					}
 				}
-
-				commands.close();
-			} catch (IOException e) {
-				e.printStackTrace();
 			}
-		//}
+
+			commands.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 }
