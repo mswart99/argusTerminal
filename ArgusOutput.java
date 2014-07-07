@@ -53,7 +53,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 	};
 
 	public static void main(String[] args) {
-		JFrame jf = new JFrame("Argus Command");
+		JFrame jf = new JFrame("Argus Output");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		ArgusOutput ao = new ArgusOutput(null);
 		jf.getContentPane().add(ao);
