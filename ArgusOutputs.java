@@ -227,7 +227,7 @@ public class OutputDisplay implements ActionListener, ItemListener {
 			array[i][0] = val;
 		}
 		
-		//Temp
+		//Temp -- replace this text with call to update data from beacon
 		
 		String chara = "";
 		String chars = "ABCDEF0123456789";
