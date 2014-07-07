@@ -18,6 +18,7 @@ import java.io.*;
 import javax.swing.JMenuItem;
 
 import TNCterminal.TNCinputDisplay;
+import TNCterminal.TNCoutputDisplay;
 import TNCterminal.TNCterminal;
 import basicTerminal.serialport.*;
 
@@ -66,6 +67,13 @@ public class ArgusTerminal extends TNCterminal {
 		tin.setEnabled(true);
 		tin.add(new ArgusCommand(this), BorderLayout.CENTER);
 		return(tin);
+	}
+	
+	protected TNCoutputDisplay initOutputDisplay() {
+		TNCoutputDisplay tout = super.initOutputDisplay();
+		tout.setEnabled(true);
+		tout.add(new ArgusOutput(this), BorderLayout.CENTER);
+		return(tout);
 	}
 	
 //	protected TNCcontrolPanel initInsetPanel(BasicTerminal bt) {
