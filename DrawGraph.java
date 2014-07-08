@@ -35,29 +35,33 @@ public class DrawGraph extends JPanel {
       super.paintComponent(g);
       Graphics2D g2 = (Graphics2D)g;
       g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      setLayout(null);
 
       List<Point> graphPoints = new ArrayList<Point>();
       double offset=0, unit=1;
-	  if(ArgusOutput.sendUnit().equals("C"))
+	  if(OutputDisplay.sendUnit().equals("C"))
 		  unit = 8;
-	  if(ArgusOutput.sendUnit().equals("mA"))
+	  if(OutputDisplay.sendUnit().equals("mA"))
 		  unit = .4;
-	  if(ArgusOutput.sendUnit().equals("V")){
+	  if(OutputDisplay.sendUnit().equals("V")){
 		  unit = 20;
 	  }
-      for(int i=14;i>=0;i--){
-     	 int y1 = (int) (((double) getHeight())-ArgusOutput.sendArray(i)*unit-100+offset);
+      for(int i=13;i>=0;i--){
+     	 int y1 = (int) (((double) getHeight())-OutputDisplay.sendArray(i)*unit-100+offset);
     	 int x1 = i*25 + BORDER_GAP;
     	 graphPoints.add(new Point(x1, y1));
       }
       // create x and y axes 
-      g2.drawLine(BORDER_GAP, getHeight() - BORDER_GAP, BORDER_GAP, BORDER_GAP);
-      g2.drawLine(BORDER_GAP, getHeight() - 4*BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - 4*BORDER_GAP);
-
+      g2.drawLine(BORDER_GAP+25, getHeight() - BORDER_GAP, BORDER_GAP+25, BORDER_GAP);
+      g2.drawLine(BORDER_GAP+25, getHeight() - 4*BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - 4*BORDER_GAP);
+      
+      g2.drawString(Integer.toString(12),5,30);
+      g2.drawString("0", 18, getHeight() - 4*BORDER_GAP+5);
+      
       // create hatch marks for y axis. 
       for (int i = 0; i < Y_HATCH_CNT; i++) {
-         int x0 = BORDER_GAP+10;
-         int x1 = x0-20;
+         int x0 = BORDER_GAP+15;
+         int x1 = x0+20;
          int y0 = 25*i + getHeight() - 300;
          int y1 = y0;
          g2.drawLine(x0, y0, x1, y1);
@@ -76,9 +80,9 @@ public class DrawGraph extends JPanel {
       g2.setColor(GRAPH_COLOR);
       g2.setStroke(GRAPH_STROKE);
       for (int i = 0; i < graphPoints.size() - 1; i++) {
-         int x1 = graphPoints.get(i).x;
+         int x1 = graphPoints.get(i).x+25;
          int y1 = graphPoints.get(i).y;
-         int x2 = graphPoints.get(i + 1).x;
+         int x2 = graphPoints.get(i + 1).x+25;
          int y2 = graphPoints.get(i + 1).y;
          g2.drawLine(x1, y1, x2, y2);         
       }
@@ -86,11 +90,11 @@ public class DrawGraph extends JPanel {
       g2.setStroke(oldStroke);      
 
       for (int i = 0; i < graphPoints.size(); i++) {
-         int x = i*25 + BORDER_GAP - (GRAPH_POINT_WIDTH/2) +(1/2);
-         int y = (int) (((double)getHeight())-ArgusOutput.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
+         int x = i*25 + BORDER_GAP - (GRAPH_POINT_WIDTH/2) +(1/2)+25;
+         int y = (int) (((double)getHeight())-OutputDisplay.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
          int ovalW = GRAPH_POINT_WIDTH;
          int ovalH = GRAPH_POINT_WIDTH;
-   	  	 g2.setColor(ArgusOutput.sendColor(ArgusOutput.sendArray(i)));
+   	  	 g2.setColor(OutputDisplay.sendColor(OutputDisplay.sendArray(i)));
          g2.fillOval(x, y, ovalW, ovalH);
       }
    }
