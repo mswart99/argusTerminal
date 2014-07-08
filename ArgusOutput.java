@@ -284,6 +284,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 		
 		//End Temp
 		
+		DrawGraph.redraw();
 	}
 	
 	static int search(String line, String sym){
