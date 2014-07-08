@@ -331,6 +331,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 		if(name.equals("Update")){
 			decodeBeacon(beaconText);
 		}else{
+			DrawGraph.close();
 			find = Integer.parseInt(name.substring(5,name.length()));
 			String[] arguments = new String[] {""};
 			DrawGraph.main(arguments);
