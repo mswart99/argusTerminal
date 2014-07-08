@@ -128,4 +128,12 @@ public class DrawGraph extends JPanel {
          }
       });
    }
+   
+   public static void redraw(){
+   	if(frame!=null) mainPanel.repaint();
+   }
+   
+   public static void close(){
+	if(frame!=null) frame.dispose();
+   }
 }
