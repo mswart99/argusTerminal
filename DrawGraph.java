@@ -25,6 +25,8 @@ public class DrawGraph extends JPanel {
    private static final int GRAPH_POINT_WIDTH = 6;
    private static final int Y_HATCH_CNT = 12;
    private List<Integer> scores;
+   static DrawGraph mainPanel;
+   
 
    public DrawGraph(List<Integer> scores) {
       this.scores = scores;
@@ -39,15 +41,15 @@ public class DrawGraph extends JPanel {
 
       List<Point> graphPoints = new ArrayList<Point>();
       double offset=0, unit=1;
-	  if(OutputDisplay.sendUnit().equals("C"))
+	  if(ArgusOutput.sendUnit().equals("C"))
 		  unit = 8;
-	  if(OutputDisplay.sendUnit().equals("mA"))
+	  if(ArgusOutput.sendUnit().equals("mA"))
 		  unit = .4;
-	  if(OutputDisplay.sendUnit().equals("V")){
+	  if(ArgusOutput.sendUnit().equals("V")){
 		  unit = 20;
 	  }
       for(int i=13;i>=0;i--){
-     	 int y1 = (int) (((double) getHeight())-OutputDisplay.sendArray(i)*unit-100+offset);
+     	 int y1 = (int) (((double) getHeight())-ArgusOutput.sendArray(i)*unit-100+offset);
     	 int x1 = i*25 + BORDER_GAP;
     	 graphPoints.add(new Point(x1, y1));
       }
@@ -91,10 +93,10 @@ public class DrawGraph extends JPanel {
 
       for (int i = 0; i < graphPoints.size(); i++) {
          int x = i*25 + BORDER_GAP - (GRAPH_POINT_WIDTH/2) +(1/2)+25;
-         int y = (int) (((double)getHeight())-OutputDisplay.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
+         int y = (int) (((double)getHeight())-ArgusOutput.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
          int ovalW = GRAPH_POINT_WIDTH;
          int ovalH = GRAPH_POINT_WIDTH;
-   	  	 g2.setColor(OutputDisplay.sendColor(OutputDisplay.sendArray(i)));
+   	  	 g2.setColor(ArgusOutput.sendColor(ArgusOutput.sendArray(i)));
          g2.fillOval(x, y, ovalW, ovalH);
       }
    }
@@ -110,7 +112,7 @@ public class DrawGraph extends JPanel {
       for (int i = 0; i < maxDataPoints ; i++) {
          scores.add(i);
       }
-      DrawGraph mainPanel = new DrawGraph(scores);
+      mainPanel = new DrawGraph(scores);
 
       JFrame frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -130,10 +132,10 @@ public class DrawGraph extends JPanel {
    }
    
    public static void redraw(){
-   	if(frame!=null) mainPanel.repaint();
+   	if(mainPanel!=null) mainPanel.repaint();
    }
    
    public static void close(){
-	if(frame!=null) frame.dispose();
+	if(mainPanel!=null) frame.dispose();
    }
 }
