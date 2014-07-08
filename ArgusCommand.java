@@ -125,10 +125,9 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				Box bRow = Box.createHorizontalBox();
 				
 				String name = line.substring(0, check(line, "~"));
-				JButton send = new JButton("Send"+name);
-				send.setPreferredSize(new Dimension(72, 30));
-				send.setMaximumSize(new Dimension(72, 30));
+				JButton send = new JButton("Send");
 				send.addActionListener(this);
+				send.setActionCommand(name);
 				bRow.add(send);
 				
 				JLabel label = new JLabel("     "+name);
@@ -197,7 +196,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 
 			String in;
 			for(int i=0; (in=commands.readLine())!=null; i++){
-				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name.substring(4,name.length()))){
+				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name)){
 					if((par = check(in, "^")) != 0){
 						if (((che = check(in, "#")) != 0) &&
 							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[i].getText(), "Confirm", JOptionPane.YES_NO_OPTION)
