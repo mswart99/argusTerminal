@@ -34,6 +34,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		"ArgusCommands.argus"
 	};
 
+	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Argus Command");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -41,7 +42,8 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		jf.getContentPane().add(ac);
 		jf.setVisible(true);
 		jf.pack();
-	}
+	    	jf.resize(new Dimension(frame.getWidth(),500));
+	}	
 
 	public ArgusCommand(ArgusTerminal at) {
 		super(at);
