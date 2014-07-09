@@ -1,15 +1,34 @@
-Read from SD-Card~SDRFFFFFFFFLLLLLLLL^Name of SD-Card
-Get UID~VUC580065006E0003
-Get Telemetry~VUC580065006E0010
-Set Run State~VUC0A0065006E008000^Run State#
-Get Status~VUC0A0065006E0004
-Set Time~VUC0A0065006E010000005343467D#
-Get Time~VUC140065006E0101
-Get Data~VUC120065006E00280000A
-Get Run State~VUC0A0065006E0081
-Independence Off~VOFF#
-Independence On~VON#
-Schedule Command~SCCTTTTTTTTLLLL^Parameter#
-Cancel Scheduled Command~DELT0000#
+i2c~i2c^Device address,Bytes expected,Data sent
+Reset Helium Radio~RHE
+IRONMANINT = 0~RIML
+IRONMANINT = 1~IRONMANLives0
+IRONMANINT = 2~IRONMANLives1
+Reset EPS and PDM~IRONMANLives2
+VDLB~VDLB
+VAND~VAND^Bytes expected,Data sent
+VUC~VUC^Bytes expected,Data sent
+Independence On~VON
+Independence Off~VOFF
+Schedule Command~SCC^Time,Command Limit,Scheduled command
+Read from SD-Card~SDR^Offset in file,Length of bytes, File name
+SDW~SDW^Number of bytes in file name,Name of file,Command
+SDA~SDW^Number of bytes in file name,Name of file,Data
+SDdelete~SDdelete^File name
+ZEROCLOCKINT = 0~RZCL
+ZEROCLOCKINT = 1~ZEROClock0
+ZEROCLOCKINT = 2~ZEROClock1
+ZEROClock2~ZEROClock2
+HPAS~HPAS^Data sent
 Mission Clock Time~TIMM
+Set Clock Time~SCT^UNIX time
 RTC Time~TIMR
+Delete Scheduled Command~DELT^Number of tasks to delete
+Schedule Information~GETT^Number of tasks to return
+HESD~HESD^He20xx
+High-State He Radio~HPLH^Power level
+Low-State He Radio~HPLL^Power level
+BE25~BE25^Change beacon interval
+Re-load Helium st. config~HESC
+Disable Helium beacons~HEBO
+HECP~HECP
+BNOW via~BNOW
