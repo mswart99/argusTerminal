@@ -40,6 +40,9 @@ public class DrawGraph extends JPanel {
       setLayout(null);
 
       List<Point> graphPoints = new ArrayList<Point>();
+      
+      //Use these to alter graph to accommodate data type
+      
       double offset=0, unit=1;
 	  if(ArgusOutput.sendUnit().equals("C"))
 		  unit = 8;
@@ -53,14 +56,19 @@ public class DrawGraph extends JPanel {
     	 int x1 = i*25 + BORDER_GAP;
     	 graphPoints.add(new Point(x1, y1));
       }
-      // create x and y axes 
+      
+      //Create x and y axes 
+      
       g2.drawLine(BORDER_GAP+25, getHeight() - BORDER_GAP, BORDER_GAP+25, BORDER_GAP);
       g2.drawLine(BORDER_GAP+25, getHeight() - 4*BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - 4*BORDER_GAP);
+      
+      //Create axes' labels
       
       g2.drawString(Integer.toString(12),5,30);
       g2.drawString("0", 18, getHeight() - 4*BORDER_GAP+5);
       
-      // create hatch marks for y axis. 
+      //Create hash marks for y axis
+      
       for (int i = 0; i < Y_HATCH_CNT; i++) {
          int x0 = BORDER_GAP+15;
          int x1 = x0+20;
@@ -69,7 +77,8 @@ public class DrawGraph extends JPanel {
          g2.drawLine(x0, y0, x1, y1);
       }
 
-      // and for x axis
+      //Hash marks for x axis
+      
       for (int i = 0; i < scores.size() - 2; i++) {
          int x0 = 25*i + getWidth() - 350;
          int x1 = x0;
