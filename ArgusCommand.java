@@ -17,6 +17,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import mas.utils.Utils;
@@ -116,6 +117,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
 		Box con = Box.createVerticalBox();
+		JScrollPane pane = new JScrollPane(con);
 		try{
 			BufferedReader br = tryToOpenCommandFile();
 
@@ -136,14 +138,15 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				bRow.add(label);
 				
 				if (check(line, "^") != 0){
-				
-					text[i] = new JTextField();
-					bRow.add(text[i]);
-					text[i].setMaximumSize(new Dimension(125, 35));
-					
-					JLabel parameter = new JLabel();
-					bRow.add(parameter);
-					parameter.setText("   " + parExp(line));
+					for(int i=0;comma(line,i);i++){
+						text[len][i] = new JTextField(6);
+						bRow.add(text[len][i]);
+						text[len][i].setMaximumSize(new Dimension(62, 35));
+						
+						JLabel parameter = new JLabel();
+						bRow.add(parameter);
+						parameter.setText(" "+parExp(line,i)+" ");
+					}
 				}
 				
 				bRow.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -157,7 +160,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 			e.printStackTrace();
 		}
 		
-		add(con, BorderLayout.CENTER);
+		add(pane, BorderLayout.CENTER);
 	}
 
 	static int check(String line, String sym){
@@ -170,19 +173,50 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		return 0;
 	}
 	
-	static String parExp(String line){
-		
-		String title = null;
-		int i, j;
-		
-		if ((i = check(line, "^")) != 0){
-			if ((j = check(line, "#")) != 0){				
-				title = line.substring(i+1, j);
-			}else{
-				title = line.substring(i+1, line.length());
+	static boolean comma(String line, int count){
+		int found=0;
+		for(int i=0; i<line.length(); i++){
+			if (line.substring(i, i+1).equals(",")){
+				found++;
 			}
 		}
-		return title;
+		if(count<=found) return true;
+		return false;
+	}
+	
+	String attach(int count){
+		String out = "";
+		for(int i=0;!(text[count][i].getText().equals(null));i++){
+			out = out+text[count][i].getText();
+		}
+		return out;
+	}
+	
+	static String parExp(String line, int count){
+		int j=-1,a=0;
+		for(int i=0;i<line.length();i++){
+			if(line.substring(i,i+1).equals("^")){
+				j=0;
+				a=i;
+			}else if(j>=0){
+				if(line.substring(i,i+1).equals(",")||line.substring(i,i+1).equals("#")){
+					if(j<count){
+						j++;
+						a=i;
+					}else if(j==count){
+						return line.substring(a+1,i);
+					}
+				}else if(i+1==line.length()){
+					if(j<count){
+						j++;
+						a=i;
+					}else if(j==count){
+						return line.substring(a+1,line.length());
+					}
+				}
+			}
+		}
+		return "";
 	}
 
 	//Activates when button is pressed
@@ -199,11 +233,11 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name)){
 					if((par = check(in, "^")) != 0){
 						if (((che = check(in, "#")) != 0) &&
-							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+text[i].getText(), "Confirm", JOptionPane.YES_NO_OPTION)
+							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+attach(count), "Confirm", JOptionPane.YES_NO_OPTION)
 							== JOptionPane.YES_OPTION){	
-								send(in.substring(title+1, par)+text[i].getText());
+								send(in.substring(title+1, par)+attach(count));
 						}else{
-							send(in.substring(title+1, par)+text[i].getText());
+							send(in.substring(title+1, par)+attach(count));
 						}
 						break;
 					}else{
