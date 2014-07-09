@@ -186,7 +186,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	
 	String attach(int count){
 		String out = "";
-		for(int i=0;!(text[count][i].getText().equals(null));i++){
+		for(int i=0;!(text[count][i]!=null);i++){
 			out = out+text[count][i].getText();
 		}
 		return out;
