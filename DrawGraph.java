@@ -128,7 +128,7 @@ public class DrawGraph extends JPanel {
       frame.getContentPane().add(mainPanel);
       frame.setResizable(false);
       frame.pack();
-      frame.setLocationByPlatform(true);
+      frame.setLocation(p);
       frame.setVisible(true);
    }
 
@@ -144,7 +144,20 @@ public class DrawGraph extends JPanel {
    	if(mainPanel!=null) mainPanel.repaint();
    }
    
-   public static void close(){
-	if(mainPanel!=null) frame.dispose();
+   public static Point close(){
+	if(frame!=null){
+		   p = frame.getLocationOnScreen();
+		   frame.dispose();
+	   }
+	   return p;
+   }
+   
+      static void newGraph(Point in){
+	   if(mainPanel==null){
+		   p = new Point(500,125);
+	   }else{
+		   p = in;
+	   }
+	   main(null);
    }
 }
