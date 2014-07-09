@@ -2,6 +2,7 @@ package argusTerminal;
 
 import java.awt.Color;
 import java.awt.GridLayout;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -36,6 +37,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 	static double[][] array = new double[100][15];
 	static int find;
 	boolean auto;
+	Point p;
 	
 	String beaconText = "247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 320 317 0 FFFF _UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF";
 	Random r = new Random();
@@ -332,10 +334,9 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 		if(name.equals("Update")){
 			decodeBeacon(beaconText);
 		}else{
-			DrawGraph.close();
+			p = DrawGraph.close();
 			find = Integer.parseInt(name.substring(5,name.length()));
-			String[] arguments = new String[] {""};
-			DrawGraph.main(arguments);
+			DrawGraph.newGraph(p);
 		}
 	}
 
