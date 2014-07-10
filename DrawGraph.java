@@ -1,4 +1,4 @@
-package argusTerminal;
+package com.github.jkubs15;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -17,16 +17,16 @@ import javax.swing.SwingUtilities;
 
 @SuppressWarnings("serial")
 public class DrawGraph extends JPanel {
-   private static final int PREF_W = 400;
-   private static final int PREF_H = 325;
+   private static final int PREF_W = 400, PREF_H = 325;
    private static final int BORDER_GAP = 25;
    private static final Color GRAPH_COLOR = Color.blue;
    private static final Stroke GRAPH_STROKE = new BasicStroke(1.5f);
    private static final int GRAPH_POINT_WIDTH = 6;
    private static final int Y_HATCH_CNT = 12;
    private List<Integer> scores;
+   static Point p;
    static DrawGraph mainPanel;
-   
+   static JFrame frame;
 
    public DrawGraph(List<Integer> scores) {
       this.scores = scores;
@@ -40,35 +40,27 @@ public class DrawGraph extends JPanel {
       setLayout(null);
 
       List<Point> graphPoints = new ArrayList<Point>();
-      
-      //Use these to alter graph to accommodate data type
-      
       double offset=0, unit=1;
-	  if(ArgusOutput.sendUnit().equals("C"))
+	  if(OutputDisplay.sendUnit().equals("C"))
 		  unit = 8;
-	  if(ArgusOutput.sendUnit().equals("mA"))
-		  unit = .4;
-	  if(ArgusOutput.sendUnit().equals("V")){
+	  if(OutputDisplay.sendUnit().equals("mA"))
+		  unit = 1;
+	  if(OutputDisplay.sendUnit().equals("V")){
 		  unit = 20;
 	  }
       for(int i=13;i>=0;i--){
-     	 int y1 = (int) (((double) getHeight())-ArgusOutput.sendArray(i)*unit-100+offset);
+     	 int y1 = (int) (((double) getHeight())-OutputDisplay.sendArray(i)*unit-100+offset);
     	 int x1 = i*25 + BORDER_GAP;
     	 graphPoints.add(new Point(x1, y1));
       }
-      
-      //Create x and y axes 
-      
+      // create x and y axes 
       g2.drawLine(BORDER_GAP+25, getHeight() - BORDER_GAP, BORDER_GAP+25, BORDER_GAP);
       g2.drawLine(BORDER_GAP+25, getHeight() - 4*BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - 4*BORDER_GAP);
-      
-      //Create axes' labels
       
       g2.drawString(Integer.toString(12),5,30);
       g2.drawString("0", 18, getHeight() - 4*BORDER_GAP+5);
       
-      //Create hash marks for y axis
-      
+      // create hatch marks for y axis. 
       for (int i = 0; i < Y_HATCH_CNT; i++) {
          int x0 = BORDER_GAP+15;
          int x1 = x0+20;
@@ -77,8 +69,7 @@ public class DrawGraph extends JPanel {
          g2.drawLine(x0, y0, x1, y1);
       }
 
-      //Hash marks for x axis
-      
+      // and for x axis
       for (int i = 0; i < scores.size() - 2; i++) {
          int x0 = 25*i + getWidth() - 350;
          int x1 = x0;
@@ -102,10 +93,10 @@ public class DrawGraph extends JPanel {
 
       for (int i = 0; i < graphPoints.size(); i++) {
          int x = i*25 + BORDER_GAP - (GRAPH_POINT_WIDTH/2) +(1/2)+25;
-         int y = (int) (((double)getHeight())-ArgusOutput.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
+         int y = (int) (((double)getHeight())-OutputDisplay.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
          int ovalW = GRAPH_POINT_WIDTH;
          int ovalH = GRAPH_POINT_WIDTH;
-   	  	 g2.setColor(ArgusOutput.sendColor(ArgusOutput.sendArray(i)));
+   	  	 g2.setColor(OutputDisplay.sendColor(OutputDisplay.sendArray(i)));
          g2.fillOval(x, y, ovalW, ovalH);
       }
    }
@@ -123,7 +114,7 @@ public class DrawGraph extends JPanel {
       }
       mainPanel = new DrawGraph(scores);
 
-      JFrame frame = new JFrame("DrawGraph");
+      frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       frame.getContentPane().add(mainPanel);
       frame.setResizable(false);
@@ -141,18 +132,18 @@ public class DrawGraph extends JPanel {
    }
    
    public static void redraw(){
-   	if(mainPanel!=null) mainPanel.repaint();
+	   if(mainPanel!=null) mainPanel.repaint();
    }
    
    public static Point close(){
-	if(frame!=null){
+	   if(mainPanel!=null){
 		   p = frame.getLocationOnScreen();
 		   frame.dispose();
 	   }
 	   return p;
    }
    
-      static void newGraph(Point in){
+   static void newGraph(Point in){
 	   if(mainPanel==null){
 		   p = new Point(500,125);
 	   }else{
