@@ -28,7 +28,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	private static final long serialVersionUID = 1L;
 	protected ArgusTerminal argusTerminal;
 	protected StringBuffer stringBuffer;
-	JTextField[] text = new JTextField[100];
+	JTextField[][]text = new JTextField[100][5];
 	public static final String[] commandFile = {
 		"argusTerminal/ArgusCommands.argus",
 		"ArgusCommands.argus"
@@ -41,8 +41,9 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		ArgusCommand ac = new ArgusCommand(null);
 		jf.getContentPane().add(ac);
 		jf.setVisible(true);
+		jf.setResizable(false);
 		jf.pack();
-	    	jf.resize(new Dimension(frame.getWidth(),500));
+	    jf.resize(new Dimension(jf.getWidth(),500));
 	}	
 
 	public ArgusCommand(ArgusTerminal at) {
@@ -119,7 +120,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
 		Box con = Box.createVerticalBox();
-		JScrollPane pane = new JScrollPane(con);
+		JScrollPane pane = new JScrollPane(con, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 		try{
 			BufferedReader br = tryToOpenCommandFile();
 
@@ -135,19 +136,20 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				bRow.add(send);
 				
 				JLabel label = new JLabel("     "+name);
+				label.setMinimumSize(new Dimension(190,25));
 				label.setPreferredSize(new Dimension(190,25));
 				label.setMaximumSize(new Dimension(190,25));
 				bRow.add(label);
 				
 				if (check(line, "^") != 0){
-					for(int i=0;comma(line,i);i++){
-						text[len][i] = new JTextField(6);
-						bRow.add(text[len][i]);
-						text[len][i].setMaximumSize(new Dimension(62, 35));
+					for(int j=0;comma(line,j);j++){
+						text[i][j] = new JTextField(6);
+						bRow.add(text[i][j]);
+						text[i][j].setMaximumSize(new Dimension(62, 35));
 						
 						JLabel parameter = new JLabel();
 						bRow.add(parameter);
-						parameter.setText(" "+parExp(line,i)+" ");
+						parameter.setText(" "+parExp(line,j)+" ");
 					}
 				}
 				
@@ -195,25 +197,24 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	}
 	
 	static String parExp(String line, int count){
-		int j=-1,a=0;
+		int j=0,a=0;
 		for(int i=0;i<line.length();i++){
 			if(line.substring(i,i+1).equals("^")){
-				j=0;
-				a=i;
-			}else if(j>=0){
+				a=i+1;
+			}else if(a!=0){
 				if(line.substring(i,i+1).equals(",")||line.substring(i,i+1).equals("#")){
 					if(j<count){
 						j++;
-						a=i;
+						a=i+1;
 					}else if(j==count){
-						return line.substring(a+1,i);
+						return line.substring(a,i);
 					}
 				}else if(i+1==line.length()){
 					if(j<count){
 						j++;
-						a=i;
+						a=i+1;
 					}else if(j==count){
-						return line.substring(a+1,line.length());
+						return line.substring(a,line.length());
 					}
 				}
 			}
@@ -235,11 +236,11 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name)){
 					if((par = check(in, "^")) != 0){
 						if (((che = check(in, "#")) != 0) &&
-							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+attach(count), "Confirm", JOptionPane.YES_NO_OPTION)
+							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+attach(i), "Confirm", JOptionPane.YES_NO_OPTION)
 							== JOptionPane.YES_OPTION){	
-								send(in.substring(title+1, par)+attach(count));
+								send(in.substring(title+1, par)+attach(i));
 						}else{
-							send(in.substring(title+1, par)+attach(count));
+							send(in.substring(title+1, par)+attach(i));
 						}
 						break;
 					}else{

@@ -115,8 +115,9 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 				add(panel2);
 				label.setForeground(Color.white);
 				
-				JButton graph = new JButton("Graph"+i);
+				JButton graph = new JButton("Graph");
 				graph.addActionListener(this);
+				graph.setActionCommand(i+"");
 				add(graph);
 
 				panel.setBackground(Color.DARK_GRAY);
@@ -198,6 +199,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 		JButton update = new JButton("Update");
 		update.addActionListener(this);
 		add(update);
+		update.setSelected(false);
 		
         Timer timer = new Timer(1000, new ActionListener() {
         @Override
@@ -349,4 +351,3 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 		}
 	}
 }
-

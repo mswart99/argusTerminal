@@ -25,8 +25,9 @@ public class DrawGraph extends JPanel {
    private static final int GRAPH_POINT_WIDTH = 6;
    private static final int Y_HATCH_CNT = 12;
    private List<Integer> scores;
-   static DrawGraph mainPanel;
-   
+   static Point p;
+   static JFrame frame;
+   static DrawGraph mainPanel;   
 
    public DrawGraph(List<Integer> scores) {
       this.scores = scores;
@@ -123,7 +124,7 @@ public class DrawGraph extends JPanel {
       }
       mainPanel = new DrawGraph(scores);
 
-      JFrame frame = new JFrame("DrawGraph");
+      frame = new JFrame("DrawGraph");
       frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
       frame.getContentPane().add(mainPanel);
       frame.setResizable(false);
@@ -145,7 +146,7 @@ public class DrawGraph extends JPanel {
    }
    
    public static Point close(){
-	if(frame!=null){
+	if(mainPanel!=null){
 		   p = frame.getLocationOnScreen();
 		   frame.dispose();
 	   }
