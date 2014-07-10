@@ -337,7 +337,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 			decodeBeacon(beaconText);
 		}else{
 			p = DrawGraph.close();
-			find = Integer.parseInt(name.substring(5,name.length()));
+			find = Integer.parseInt(name);
 			DrawGraph.newGraph(p);
 		}
 	}

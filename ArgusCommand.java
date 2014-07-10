@@ -34,7 +34,6 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		"ArgusCommands.argus"
 	};
 
-	@SuppressWarnings("deprecation")
 	public static void main(String[] args) {
 		JFrame jf = new JFrame("Argus Command");
 		jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -43,7 +42,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		jf.setVisible(true);
 		jf.setResizable(false);
 		jf.pack();
-	    jf.resize(new Dimension(jf.getWidth(),500));
+	    jf.setSize(new Dimension(jf.getWidth(),500));
 	}	
 
 	public ArgusCommand(ArgusTerminal at) {
@@ -190,7 +189,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	
 	String attach(int count){
 		String out = "";
-		for(int i=0;!(text[count][i]!=null);i++){
+		for(int i=0;text[count][i]!=null;i++){
 			out = out+text[count][i].getText();
 		}
 		return out;
@@ -202,7 +201,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 			if(line.substring(i,i+1).equals("^")){
 				a=i+1;
 			}else if(a!=0){
-				if(line.substring(i,i+1).equals(",")||line.substring(i,i+1).equals("#")){
+				if(line.substring(i,i+1).equals(",")||line.substring(i,i+1).equals("?")){
 					if(j<count){
 						j++;
 						a=i+1;
@@ -235,20 +234,20 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 			for(int i=0; (in=commands.readLine())!=null; i++){
 				if ((title = check(in, "~")) != 0 && in.substring(0,title).equals(name)){
 					if((par = check(in, "^")) != 0){
-						if (((che = check(in, "#")) != 0) &&
+						if (((check(in, "?")) != 0) &&
 							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, par)+attach(i), "Confirm", JOptionPane.YES_NO_OPTION)
 							== JOptionPane.YES_OPTION){	
 								send(in.substring(title+1, par)+attach(i));
-						}else{
+						}else if(check(in, "?") == 0){
 							send(in.substring(title+1, par)+attach(i));
 						}
 						break;
 					}else{
-						if(((che = check(in, "#")) != 0) &&
+						if(((che = check(in, "?")) != 0) &&
 							JOptionPane.showConfirmDialog(null, "Send: "+in.substring(title+1, che), "Confirm", JOptionPane.YES_NO_OPTION)
 							== JOptionPane.YES_OPTION){	
 								send(in.substring(title+1, che));	
-						}else{
+						}else if(check(in, "?") == 0){
 							send(in.substring(title+1, in.length()));
 						}
 						break;
