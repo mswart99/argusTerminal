@@ -275,7 +275,7 @@ public class ArgusOutput extends BasicUserControlPanel implements ActionListener
 				chara = chara+"39"+chars.substring(code,code+1);
 			}else if(unit[i].equals("mA")){
 				int code = r.nextInt(10);
-				chara = chara+"3"+(10+code);
+				chara = chara+"31"+chars.substring(code,code+1);
 			}else if(unit[i].equals("V")){
 				int code = r.nextInt(5);
 				chara = chara+"32"+chars.substring(code,code+1);
