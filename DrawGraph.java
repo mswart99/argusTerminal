@@ -49,9 +49,9 @@ public class DrawGraph extends JPanel {
 		  axes[2]="-15";
 	  if(ArgusOutput.sendUnit().equals("mA"))
 		  unit = .5;
-		  axes[0]="100";
-		  axes[1]="50";
-		  axes[2]="-38";
+		  axes[0]="400";
+		  axes[1]="200";
+		  axes[2]="-150";
 	  if(ArgusOutput.sendUnit().equals("V")){
 		  unit = 20;
 		  axes[0]="10";
