@@ -41,12 +41,22 @@ public class DrawGraph extends JPanel {
 
       List<Point> graphPoints = new ArrayList<Point>();
       double offset=0, unit=1;
+      String[] axes = new String[3];
 	  if(ArgusOutput.sendUnit().equals("C"))
-		  unit = 8;
+		  unit = 5;
+		  axes[0]="40";
+		  axes[1]="20";
+		  axes[2]="-15";
 	  if(ArgusOutput.sendUnit().equals("mA"))
-		  unit = 1;
+		  unit = .5;
+		  axes[0]="100";
+		  axes[1]="50";
+		  axes[2]="-38";
 	  if(ArgusOutput.sendUnit().equals("V")){
 		  unit = 20;
+		  axes[0]="10";
+		  axes[1]="5";
+		  axes[2]="-3.75";
 	  }
       for(int i=13;i>=0;i--){
      	 int y1 = (int) (((double) getHeight())-ArgusOutput.sendArray(i)*unit-100+offset);
@@ -57,7 +67,9 @@ public class DrawGraph extends JPanel {
       g2.drawLine(BORDER_GAP+25, getHeight() - BORDER_GAP, BORDER_GAP+25, BORDER_GAP);
       g2.drawLine(BORDER_GAP+25, getHeight() - 4*BORDER_GAP, getWidth() - BORDER_GAP, getHeight() - 4*BORDER_GAP);
       
-      g2.drawString(Integer.toString(12),5,30);
+      g2.drawString(axes[0],10,30);
+      g2.drawString(axes[1],10,130);
+      g2.drawString(axes[2],8,305);
       g2.drawString("0", 18, getHeight() - 4*BORDER_GAP+5);
       
       // create hatch marks for y axis. 
