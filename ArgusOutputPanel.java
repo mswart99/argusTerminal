@@ -2,55 +2,57 @@ package argusTerminal;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Calendar;
-import java.util.Random;
+import java.text.DecimalFormat;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.Timer;
-import javax.swing.border.Border;
+import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 
 import TNCterminal.TNCoutputDisplay;
-import basicTerminal.BareBonesUserControlPanel;
+import mas.swing.NumberTextField;
 import mas.utils.Utils;
 
 public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionListener { // implements ItemListener {
 
 	private static final long serialVersionUID = 1L;
-	private static String[] unit = new String[100];
-	private JLabel[] value = new JLabel[100];
-	private static double[][] thresholds = new double[100][4];
+	private static final int MAX_NUMFIELDS = 100;
+	private static String[] unit = new String[MAX_NUMFIELDS];
+	private static String[] names = new String[MAX_NUMFIELDS];
+	private NumberTextField[] value = new NumberTextField[MAX_NUMFIELDS];
+	private double[][] thresholds = new double[MAX_NUMFIELDS][4];
 	public static final int THRESHOLD_RED_HIGH = 3;
 	public static final int THRESHOLD_YELLOW_HIGH = 2;
 	public static final int THRESHOLD_YELLOW_LOW = 1;
 	public static final int THRESHOLD_RED_LOW = 0;
-	private static double[][] array = new double[100][15];
-	private static int find;
-//	private boolean auto;
-	private Point p;
+	public static final double[] DEFAULT_THRESHOLD = {-1, 0, 1000, 10000};
+	public static final DecimalFormat FORMAT_MILLIAMPS = new DecimalFormat("#0");
+	public static final DecimalFormat FORMAT_CELSIUS = new DecimalFormat("#0.0");
+	public static final DecimalFormat FORMAT_VOLTS = new DecimalFormat("#0.00");
+	public static final DecimalFormat FORMAT_DEFAULT = new DecimalFormat("#0");
+	public static final String UNIT_CELSIUS = "C";
+	public static final String UNIT_MILLIAMPS = "mA";
+	public static final String UNIT_VOLTS = "V";
+	
+	public static final int MAX_DATAPOINTS = 15;
+	private double[][] storedData = new double[MAX_NUMFIELDS][MAX_DATAPOINTS];
+//	private static int find;
+//	private Point p;
+	private JButton fakeButton = new JButton();	// Only exists to trigger actions
 
-//	private String beaconText;	// A complete beacon text string
 	public static final String[] BEACON_TEST_STRING = 
 		{"247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 325 317 0 " + 
 					"FFFF _UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
-		"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 0 " + 
+		"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 1 " + 
 					"FFFF _UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
 		"237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 0 " + 
 					"FFFF _UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
@@ -59,14 +61,6 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	public static final int CLOCK_SPOT = 19;
 	public static final int RSSI_SPOT = 18;
 	public static final int VERSION_SPOT = 22;
-//	private Random r = new Random();
-
-	//	private int hour;
-	//    private int min;
-	//    private int second;
-	//    JLabel clockMain;
-
-//	protected ArgusTerminal argusTerminal;
 	protected StringBuffer stringBuffer;
 	public static final String[] outputFile = {
 		"argusTerminal/ArgusOutputs.argus",
@@ -101,11 +95,10 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 
 	public ArgusOutputPanel(ArgusTerminal at){
 		super();
-//		argusTerminal = at;
 		initDisplay();
 	}
 
-	private BufferedReader tryToOpenOutputFile() {
+	private static BufferedReader tryToOpenOutputFile() {
 		BufferedReader br;
 		for (int i=0; i < outputFile.length; i++) {
 			try {
@@ -124,9 +117,10 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	}
 
 	private void initDisplay(){
-		//		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
 		JPanel displayPanel = new JPanel(new GridLayout(0, 4));
+		Color bgColor = Color.darkGray;
+		displayPanel.setBackground(bgColor);
 		add(displayPanel, BorderLayout.CENTER);
 		
 		try {
@@ -136,140 +130,100 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			for(int i=0; (line = br.readLine())!= null; i++) {
 				// Split by tabs
 				String[] paramSplit = line.split("\t");
-				JPanel panel1 = new JPanel();
-				JLabel name = new JLabel(paramSplit[0]);
-				panel1.add(name);
-				displayPanel.add(panel1);
+//				JPanel panel1 = new JPanel();
+				names[i] = new String(paramSplit[0]);
+				JLabel name = new JLabel(names[i]);
+				name.setHorizontalAlignment(JLabel.RIGHT);
+//				panel1.add(name);
+				displayPanel.add(name);
 				name.setForeground(Color.white);
 
-				JPanel panel = new JPanel();
-				value[i] = new JLabel();
+//				JPanel panel = new JPanel();
+				value[i] = new NumberTextField();
 				value[i].setForeground(Color.white);
 				value[i].setFont(new Font(Utils.typewriterFont(), Font.BOLD, 13));
-				panel.add(value[i]);
-				displayPanel.add(panel);
+				value[i].setBackground(bgColor);
+//				panel.add(value[i]);
+				displayPanel.add(value[i]);
 
-				JPanel panel2 = new JPanel();
+//				JPanel panel2 = new JPanel();
 				unit[i] = paramSplit[1];
 				JLabel label = new JLabel(unit[i]);
-				panel2.add(label);
-				displayPanel.add(panel2);
+				label.setHorizontalAlignment(JLabel.LEFT);
+//				panel2.add(label);
+				displayPanel.add(label);
 				label.setForeground(Color.white);
+				
+				setNumberFormat(value[i], paramSplit[1]);
 
+//				JPanel jp = new JPanel();
 				JButton graph = new JButton("Graph");
 				graph.addActionListener(this);
 				graph.setActionCommand("Graph" + i);
+//				jp.add(graph);
 				displayPanel.add(graph);
 
-				panel.setBackground(Color.DARK_GRAY);
-				panel1.setBackground(Color.DARK_GRAY);
-				panel2.setBackground(Color.DARK_GRAY);
-				Border loweredetched;
-				loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
-				panel.setBorder(loweredetched);
+//				panel1.setBackground(Color.DARK_GRAY);
+//				panel2.setBackground(Color.DARK_GRAY);
+//				Border loweredetched;
+//				loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+				value[i].setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
 				//Color Thresholds
 				for (int j=0; j < 4; j++) {
 					if (paramSplit.length > j+2) {
 						thresholds[i][j]=Double.valueOf(paramSplit[j+2]);
 					} else {
-						thresholds[i][j]=0;
+						thresholds[i][j]=DEFAULT_THRESHOLD[j];
 					}
 				}
-
-//				if(!(unit[i].equals(null))){
-//					if(unit[i].equals("C")){
-//						thresholds[i][THRESHOLD_RED_LOW]=10;
-//						thresholds[i][THRESHOLD_YELLOW_LOW]=15;
-//						thresholds[i][THRESHOLD_YELLOW_HIGH]=30;
-//						thresholds[i][THRESHOLD_RED_HIGH]=35;
-//					}else if(unit[i].equals("V")){
-//						thresholds[i][THRESHOLD_RED_LOW]=7.5;
-//						thresholds[i][THRESHOLD_YELLOW_LOW]=7.75;
-//						thresholds[i][THRESHOLD_YELLOW_HIGH]=9.25;
-//						thresholds[i][THRESHOLD_RED_HIGH]=9.5;
-//					}else if(unit[i].equals("mA")){
-//						thresholds[i][THRESHOLD_RED_LOW]=75;
-//						thresholds[i][THRESHOLD_YELLOW_LOW]=100;
-//						thresholds[i][THRESHOLD_YELLOW_HIGH]=325;
-//						thresholds[i][THRESHOLD_RED_HIGH]=350;
-//					}else{
-//						thresholds[i][THRESHOLD_RED_LOW]=0;
-//						thresholds[i][THRESHOLD_YELLOW_LOW]=0;
-//						thresholds[i][THRESHOLD_YELLOW_HIGH]=0;
-//						thresholds[i][THRESHOLD_RED_HIGH]=0;
-//					}
-//				}
 			}
-
 			br.close();
 			value[0].setForeground(Color.white);
-		} catch (FileNotFoundException e){
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (FileNotFoundException fnfe){
+			System.err.println("ArgusOutputPanel cannot find the file: " + fnfe.getMessage());
+		} catch (IOException ioe) {
+			System.err.println("IOException in ArgusOutputPanel: " + ioe.getMessage());
 		}
 
-//		decodeBeacon(beaconText);
 		for(int i=0;i<3;i++){
 			JPanel nullPanel = new JPanel();
 			displayPanel.add(nullPanel);
 			nullPanel.setBackground(Color.darkGray);
 		}
-//		JCheckBox refresh = new JCheckBox("Refresh");
-//		refresh.addItemListener(this);
-//		add(refresh);
-//		refresh.setSelected(true);
-//		clock();
 	}
 
-	//	public void clock(){
-	//		JPanel clockM = new JPanel();
-	//		JPanel clockN = new JPanel();
-	//		JPanel clockU = new JPanel();
-	//		clockMain = new JLabel();
-	//        JLabel clockName = new JLabel("Clock");
-	//        JLabel clockUnit = new JLabel("ms");
-	//        clockN.add(clockName);
-	//        clockM.add(clockMain);
-	//        clockU.add(clockUnit);
-	//        add(clockN); add(clockM); add(clockU);
-	//        
-	//        clockMain.setForeground(Color.cyan);
-	//		clockM.setBackground(Color.DARK_GRAY);
-	//		clockName.setForeground(Color.white);
-	//		clockN.setBackground(Color.DARK_GRAY);
-	//		clockUnit.setForeground(Color.white);
-	//		clockU.setBackground(Color.DARK_GRAY);
-	//		Border loweredetched;
-	//		loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
-	//		clockM.setBorder(loweredetched);
-	//		
-	//		JButton update = new JButton("Update");
-	//		update.addActionListener(this);
-	//		add(update);
-	//		update.setSelected(false);
-
-	//        Timer timer = new Timer(1000, new ActionListener() {
-	////        @Override
-	//        public void actionPerformed(ActionEvent e) {
-	////            Calendar cal = Calendar.getInstance();
-	////            hour=cal.get(Calendar.HOUR_OF_DAY);
-	////            min=cal.get(Calendar.MINUTE);
-	////            second=cal.get(Calendar.SECOND);
-	////            clockMain.setText(hour+":"+min+":"+second);
-	//            
-	//            //Refresh Rate
-	//            
-	//            if (second%5==0 && auto){
-	//            	decodeBeacon(beaconText);
-	//            }
-	//            }
-	//        });
-	//        timer.setRepeats(true);
-	//        timer.setCoalesce(true);
-	//        timer.start();
-	//	}
+	public static void setNumberFormat(NumberTextField ntf, String unit) {
+		DecimalFormat df = FORMAT_DEFAULT;
+		if (unit.equals(UNIT_MILLIAMPS)) {
+			df = FORMAT_MILLIAMPS;
+		} else if (unit.equals(UNIT_CELSIUS)) {
+			df = FORMAT_CELSIUS;
+		} else if (unit.equals(UNIT_VOLTS)) {
+			df = FORMAT_VOLTS;
+		}
+		ntf.setFormat(df);
+	}
+	
+	public static double hexToUnits(String hexData, String unit) {
+		// Grab each hex element and convert to integer
+		double val = -1;
+		try {
+			val = Integer.parseInt(hexData, 16);
+		} catch (NumberFormatException nfe) {
+			// Do nothing. Drop the bit and move on
+		}
+		double data = val;
+		// Convert
+		if (unit.equals(UNIT_MILLIAMPS)){
+			data = (3.3*val/1024 - 2.522)*50000/9;
+		}else if (unit.equals(UNIT_VOLTS)) {
+			data = 3.3*val/1024*15.11/5.11;
+		}else if (unit.equals(UNIT_CELSIUS)) {
+			data = 330*val/1024 - 273.14;
+		}
+		return(data);
+	}
 
 	public void receive(String parseBeacon) {
 		// Clean up
@@ -284,56 +238,14 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		// The next 16 elements are 2-bit hex
 		for(int i=1; i<17; i++){
 			// Grab each hex element and convert to integer
-//			String parse = parseBeacon.substring((i-1)*4,(((i-1)*4)+3));
-			double val = -1;
-			try {
-				val = Integer.parseInt(beaconBits[i-1], 16);
-			} catch (NumberFormatException nfe) {
-				// Do nothing. Drop the bit and move on
+			double convertedData = hexToUnits(beaconBits[i-1], unit[i]);
+			value[i].set(convertedData);
+			value[i].setForeground(sendTLCcolor(convertedData, i));
+			// Move the stored values over one column to make room for this data
+			for(int j=0; j < MAX_DATAPOINTS-1; j++) {
+				storedData[i][j]=storedData[i][j+1];
 			}
-//			double val = 0;
-//			if(check(parse,"A") ||check(parse,"B") ||check(parse,"C") ||check(parse,"D") ||
-//					check(parse,"E") ||check(parse,"F")){   
-//				val = Integer.parseInt(parse,16);
-//			}else{
-//				val = Integer.parseInt(parse,16);
-//			}
-//			System.out.println(parse + ": " + val1 + " vs " + val);
-
-			//Conversions
-
-			if(unit[i].equals("mA")){
-				String data = (double)((3.3*val/1024) - 2.522)*50000/9+"";
-				value[i].setText(data.substring(0,search(data,".")));
-			}else if(unit[i].equals("V")){
-				String data =(double)(3.3*(val)/1024*15.11/5.11)+"";
-				value[i].setText(data.substring(0,(search(data,".")+3)));
-			}else if(unit[i].equals("C")){
-				String data =(double)(330*(val)/1024 - 273.14)+"";
-				value[i].setText(data.substring(0,(search(data,".")+2)));
-			} else {
-				value[i].setText((int) val + "");
-			}
-
-			if(!(value[i].getText().equals("")))
-				val=Double.parseDouble(value[i].getText());
-
-			if (val<thresholds[i][THRESHOLD_RED_LOW]) {
-				value[i].setForeground(Color.red);
-			} else if (val<thresholds[i][THRESHOLD_YELLOW_LOW]) {
-				value[i].setForeground(Color.yellow);
-			} else if (val<=thresholds[i][THRESHOLD_YELLOW_HIGH]) { 
-				value[i].setForeground(Color.green);
-			} else if (val > thresholds[i][THRESHOLD_RED_HIGH]) {
-				value[i].setForeground(Color.red);				
-			} else {
-				value[i].setForeground(Color.yellow);
-			}
-			if (thresholds[i][THRESHOLD_RED_HIGH]<val)
-			for(int j=14;j>0;j--){
-				array[i][j]=array[i][j-1];
-			}
-			array[i][0] = val;
+			storedData[i][MAX_DATAPOINTS-1] = convertedData;
 		}
 		rowCount = 17;
 		// Next is the Vandy state
@@ -351,30 +263,9 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(0, 2));
 		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(2));
 		
-		//Temp
-
-//		String chara = "";
-//		String chars = "ABCDEF0123456789";
-//		for(int i=1;i<17;i++){
-//			if(unit[i].equals("C")){
-//				int code = r.nextInt(5);
-//				chara = chara+"39"+chars.substring(code,code+1);
-//			}else if(unit[i].equals("mA")){
-//				int code = r.nextInt(10);
-//				chara = chara+"31"+chars.substring(code,code+1);
-//			}else if(unit[i].equals("V")){
-//				int code = r.nextInt(5);
-//				chara = chara+"32"+chars.substring(code,code+1);
-//			}else{
-//				chara = chara+"123";
-//			}
-//			chara = chara+" ";
-//		}
-////		beaconText = chara;
-
-		//End Temp
-
-		DrawGraph.redraw();
+		// Update all the active graphs
+		fakeButton.doClick();
+//		DrawGraph.redraw();
 	}
 
 	static int search(String line, String sym){
@@ -395,50 +286,44 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		return false;
 	}
 
-	public static double sendArray(int i){
-		return array[find][i];
+	public double sendArray(int i, int sensorID){
+		return storedData[sensorID][i];
 	}
 
-	public static String sendUnit(){
-		if(!(unit[find].equals(null))){
-			return unit[find];
+	public static String sendUnit(int sensorID){
+		if(!(unit[sensorID].equals(null))){
+			return unit[sensorID];
 		}
 		return "";
 	}
 
-	public static Color sendColor(double j){
-		if(j<thresholds[find][0]) return Color.red;
-		if(thresholds[find][0]<=j&&j<thresholds[find][1]) return Color.yellow;
-		if(thresholds[find][1]<=j&&j<=thresholds[find][2]) return Color.green;
-		if(thresholds[find][2]<j&&j<=thresholds[find][3]) return Color.yellow;
-		if(thresholds[find][3]<j) return Color.red;
-		return Color.white;
+	/** Run the threshold limit check and return the appropriate color. This
+	 * function assumes that the threshold limits are defined properly. 
+	 * 
+	 * @param testValue
+	 * @return
+	 */
+	public Color sendTLCcolor(double testValue, int sensorNum){
+		// Start low and work your way up
+		if (testValue <  thresholds[sensorNum][THRESHOLD_RED_LOW]) return Color.red;
+		if (testValue <= thresholds[sensorNum][THRESHOLD_YELLOW_LOW]) return Color.yellow;
+		if (testValue <= thresholds[sensorNum][THRESHOLD_YELLOW_HIGH]) return Color.green;
+		if (testValue <= thresholds[sensorNum][THRESHOLD_RED_HIGH]) return Color.yellow;
+		return Color.red;
 	}
 
 	public void actionPerformed(ActionEvent actionE) {
 		super.actionPerformed(actionE);
 		String actionC = actionE.getActionCommand();
 		if (actionC.startsWith("Graph")) {
-			find = Integer.parseInt(actionC.substring(5));
-			p = DrawGraph.close();
-			DrawGraph.newGraph(p);			
-		}
-//
-//		if(name.equals("Update")){
-//			decodeBeacon(BEACON_TEST_STRING[0]);
-//		}else{
+			int sID = Integer.parseInt(actionC.substring(5));
+			Point p = ((Component) actionE.getSource()).getLocation();
+			p.x = p.x + 300;
+			DrawGraph dg = new DrawGraph(this, sID, p, MAX_DATAPOINTS, 
+					names[sID] + " (" + unit[sID] + ")");
+			fakeButton.addActionListener(dg);
 //			p = DrawGraph.close();
-//			find = Integer.parseInt(name);
-//			DrawGraph.newGraph(p);
-//		}
+//			DrawGraph.newGraph(p, find);			
+		}
 	}
-
-//	//	@Override
-//	public void itemStateChanged(ItemEvent arg0) {
-//		if (arg0.getStateChange() == ItemEvent.SELECTED){
-//			auto = true;
-//		}else{
-//			auto = false;
-//		}
-//	}
 }

@@ -6,7 +6,7 @@ X- Temp	C	-25	0	30	50
 Y+ Current	mA	-1	-1	200	400
 Y+ Temp	C	-25	0	30	50
 Y- Temp	C	-25	0	30	50
-X- Current	-1	-1	200	400
+X- Current	mA	-1	-1	200	400
 none	-
 Y- Current	mA	-1	-1	200	400
 Bat Temp	C	-25	0	30	50
