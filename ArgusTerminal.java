@@ -17,7 +17,9 @@ import java.io.*;
 
 import javax.swing.JMenuItem;
 
+import TNCterminal.TNCcontrolPanel;
 import TNCterminal.TNCinputDisplay;
+import TNCterminal.TNCinterpreter;
 import TNCterminal.TNCoutputDisplay;
 import TNCterminal.TNCterminal;
 import basicTerminal.serialport.*;
@@ -27,6 +29,7 @@ public class ArgusTerminal extends TNCterminal {
 	public static final String version = "ArgusTerminal 1.0 06/03/2014";
 	public static String helpMessage = 
 		"Usage:  ArgusTerminal [-s serialPortNum]";
+	public static final String UNPROTO_ARGUS = "ARGUS1";
 //	protected TNCcore tncCore;
 	
 	public static void main(String[] args) throws IOException {
@@ -70,10 +73,30 @@ public class ArgusTerminal extends TNCterminal {
 	}
 	
 	protected TNCoutputDisplay initOutputDisplay() {
-		TNCoutputDisplay tout = super.initOutputDisplay();
-		tout.setEnabled(true);
-		tout.add(new ArgusOutput(this), BorderLayout.CENTER);
-		return(tout);
+//		TNCoutputDisplay tout = super.initOutputDisplay();
+//		tout.setEnabled(true);
+//		tout.add(new ArgusOutputPanel(this), BorderLayout.CENTER);
+//		return(tout);
+		return(new ArgusOutputPanel(this));
+	}
+	
+	/** Updates the default command settings for Argus.
+	 * 
+	 * @return
+	 */
+	protected String[] getTNCCommandDefaults() {
+		String[] commandDefaults = TNCcontrolPanel.BASE_TNCCOMMANDDEFAULT;
+		/* Obviously, this is predicated on knowing which value in the String array
+		 * we need to change. We could write a snazzy function to check the list in
+		 * BASE_TNCCOMMANDLIST to find our match, but we're going to assume that nobody
+		 * is monkeying with the order of that list.
+		 */
+		commandDefaults[1] = UNPROTO_ARGUS;
+		return(commandDefaults);
+	}
+	
+	protected TNCinterpreter getInterpreter(TNCterminal tnct) {
+		return(new ArgusInterpreter(tnct));
 	}
 	
 //	protected TNCcontrolPanel initInsetPanel(BasicTerminal bt) {

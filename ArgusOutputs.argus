@@ -1,16 +1,21 @@
-????~?
-C_X+~mA
-T_X+~C
-T_X-~C
-C_Y+~mA
-T_Y+~C
-T_Y-~C
-C_X-~mA
-????~?
-C_Y-~mA
-T_Bat~C
-V_Bat~V
-C_Bat~mA
-????~?
-C_5V~mA
-C_3.3V~mA
+Mission Clock	sec
+none	-
+X+ Current	mA	-1	-1	200	201
+X+ Temp	C	-25	0	30	50
+X- Temp	C	-25	0	30	50
+Y+ Current	mA	-1	-1	200	400
+Y+ Temp	C	-25	0	30	50
+Y- Temp	C	-25	0	30	50
+X- Current	-1	-1	200	400
+none	-
+Y- Current	mA	-1	-1	200	400
+Bat Temp	C	-25	0	30	50
+Bat Voltage	V	7.2	7.5	8.5	9.0
+Bat Current	mA	-400	-300	300	400
+none	-
+5V Current	mA	-1	-1	200	400
+3.3V Current	mA	-1	-1	200	400
+Vandy	-
+RSSI	dB	0	0	100	200
+Software Version	-
+State	-

@@ -21,9 +21,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 
 import mas.utils.Utils;
-import basicTerminal.BasicUserControlPanel;
+import basicTerminal.BareBonesUserControlPanel;
 
-public class ArgusCommand extends BasicUserControlPanel implements ActionListener {
+public class ArgusCommand extends BareBonesUserControlPanel implements ActionListener {
 
 	private static final long serialVersionUID = 1L;
 	protected ArgusTerminal argusTerminal;
@@ -51,6 +51,9 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		init();
 	}
 	
+	/** Additional check for null ArgusTerminal class (i.e., when this class is called
+	 * as main() ). If there is no ArgusTerminal, dump to stdout.
+	 */
 	public void message(String text, boolean makeBold) {
 		if (argusTerminal == null) {
 			System.out.println(text);
@@ -59,6 +62,9 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 		}
 	}
 	
+	/** Additional check for null ArgusTerminal class (i.e., when this class is called
+	 * as main() ). If there is no ArgusTerminal, dump to stdout.
+	 */
 	public void message(String text) {
 		message(text, false);
 	}
@@ -116,7 +122,7 @@ public class ArgusCommand extends BasicUserControlPanel implements ActionListene
 	}
 	
 	private void init() {
-		breakButton.setEnabled(false);  // We don't use it
+//		breakButton.setEnabled(false);  // We don't use it
 		stringBuffer = new StringBuffer();
 		Box con = Box.createVerticalBox();
 		JScrollPane pane = new JScrollPane(con, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);

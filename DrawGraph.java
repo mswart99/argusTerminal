@@ -42,24 +42,24 @@ public class DrawGraph extends JPanel {
       List<Point> graphPoints = new ArrayList<Point>();
       double offset=0, unit=1;
       String[] axes = new String[3];
-	  if(ArgusOutput.sendUnit().equals("C"))
+	  if(ArgusOutputPanel.sendUnit().equals("C"))
 		  unit = 5;
 		  axes[0]="40";
 		  axes[1]="20";
 		  axes[2]="-15";
-	  if(ArgusOutput.sendUnit().equals("mA"))
+	  if(ArgusOutputPanel.sendUnit().equals("mA"))
 		  unit = .5;
 		  axes[0]="400";
 		  axes[1]="200";
 		  axes[2]="-150";
-	  if(ArgusOutput.sendUnit().equals("V")){
+	  if(ArgusOutputPanel.sendUnit().equals("V")){
 		  unit = 20;
 		  axes[0]="10";
 		  axes[1]="5";
 		  axes[2]="-3.75";
 	  }
       for(int i=13;i>=0;i--){
-     	 int y1 = (int) (((double) getHeight())-ArgusOutput.sendArray(i)*unit-100+offset);
+     	 int y1 = (int) (((double) getHeight())-ArgusOutputPanel.sendArray(i)*unit-100+offset);
     	 int x1 = i*25 + BORDER_GAP;
     	 graphPoints.add(new Point(x1, y1));
       }
@@ -105,10 +105,10 @@ public class DrawGraph extends JPanel {
 
       for (int i = 0; i < graphPoints.size(); i++) {
          int x = i*25 + BORDER_GAP - (GRAPH_POINT_WIDTH/2) +(1/2)+25;
-         int y = (int) (((double)getHeight())-ArgusOutput.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
+         int y = (int) (((double)getHeight())-ArgusOutputPanel.sendArray(i)*unit-100+offset-((double)GRAPH_POINT_WIDTH)/2);
          int ovalW = GRAPH_POINT_WIDTH;
          int ovalH = GRAPH_POINT_WIDTH;
-   	  	 g2.setColor(ArgusOutput.sendColor(ArgusOutput.sendArray(i)));
+   	  	 g2.setColor(ArgusOutputPanel.sendColor(ArgusOutputPanel.sendArray(i)));
          g2.fillOval(x, y, ovalW, ovalH);
       }
    }
