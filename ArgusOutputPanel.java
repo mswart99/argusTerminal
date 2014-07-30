@@ -3,6 +3,7 @@ package argusTerminal;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -18,6 +19,8 @@ import java.text.DecimalFormat;
 import javax.swing.*;
 import javax.swing.border.EtchedBorder;
 
+import TNCterminal.HeliumConfig;
+import TNCterminal.HeliumTelemetry;
 import TNCterminal.TNCoutputDisplay;
 import mas.swing.NumberTextField;
 import mas.utils.Utils;
@@ -48,19 +51,36 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 //	private static int find;
 //	private Point p;
 	private JButton fakeButton = new JButton();	// Only exists to trigger actions
+	private HeliumTelemetry heliumTelem;
+	private HeliumConfig heliumConfig;
 
 	public static final String[] BEACON_TEST_STRING = 
-		{"247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 325 317 0 " + 
-					"FFFF _UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
-		"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 1 " + 
-					"FFFF _UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
-		"237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 0 " + 
-					"FFFF _UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
+		{"247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 325 317 0 FFFF " + 
+				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+				"00FF8EFFFF0C0000765C000000FF901600 " +
+				"000000190 3F:7F:7F.00 3F/1F/20FF 031",
+//					"_UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
+		"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 1 FFFF " + 
+		"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+		"00FF8EFFFF0C0000765C000000FF901600 " +
+		"000000200 3F:7F:7F.00 3F/1F/20FF 031",
+//					"_UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
+		"237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 0 FFFF " + 
+		"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+		"00FF8EFFFF0C0000765C000000FF901600 " +
+		"000000210 3F:7F:7F.00 3F/1F/20FF 031",
+//					"_UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
+		"23E 314 3A1 3A4 312 3A1 3A0 315 230 311 3A3 324 315 1FC 31E 315 0 FFFF " + 
+				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+				"00FF8EFFFF0C0000765C000000FF901600 " +
+				"000000220 3F:7F:7F.00 3F/1F/20FF 031"
 		};
 	public static final int VANDY_SPOT = 16;
-	public static final int CLOCK_SPOT = 19;
-	public static final int RSSI_SPOT = 18;
-	public static final int VERSION_SPOT = 22;
+	public static final int HLMCONFIG_SPOT = 18;
+	public static final int HLMTLM_SPOT = 19;
+	public static final int CLOCK_SPOT = 20;
+//	public static final int RSSI_SPOT = 18;
+	public static final int VERSION_SPOT = 23;
 	protected StringBuffer stringBuffer;
 	public static final String[] outputFile = {
 		"argusTerminal/ArgusOutputs.argus",
@@ -122,7 +142,13 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		Color bgColor = Color.darkGray;
 		displayPanel.setBackground(bgColor);
 		add(displayPanel, BorderLayout.CENTER);
-		
+		// The Helium stuff goes off to the right
+		JPanel heliumPanel = new JPanel(new BorderLayout());
+		heliumConfig = new HeliumConfig();
+		heliumTelem = new HeliumTelemetry();
+		heliumPanel.add(heliumConfig, BorderLayout.CENTER);
+		heliumPanel.add(heliumTelem, BorderLayout.NORTH);
+		add(heliumPanel, BorderLayout.EAST);
 		try {
 			BufferedReader br = tryToOpenOutputFile();
 
@@ -232,6 +258,8 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		String[] beaconBits = parseBeacon.split(" ");
 		int rowCount = 0;
 		
+		// Try to parse; fail gracefully
+		try {
 		// Following Justin's original setup
 		// Except mission clock is first
 		value[rowCount++].setText(beaconBits[CLOCK_SPOT]);
@@ -257,12 +285,18 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			value[rowCount].setForeground(Color.lightGray);			
 		}
 		rowCount++;
-		// RSSI
-		value[rowCount++].setText(beaconBits[RSSI_SPOT].substring(8));
+		// Vandy data
+		value[rowCount++].setText(beaconBits[VANDY_SPOT+1]);
 		// Software version and state are split
 		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(0, 2));
 		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(2));
 		
+		// Let the helium panels do their thing
+		heliumTelem.parseString(beaconBits[HLMTLM_SPOT]);
+		heliumConfig.parseString(beaconBits[HLMCONFIG_SPOT]);
+		} catch (StringIndexOutOfBoundsException sioobe) {
+			System.err.println("ArgusOutputPanel got stuck at " + rowCount + " from " + parseBeacon);
+		}
 		// Update all the active graphs
 		fakeButton.doClick();
 //		DrawGraph.redraw();

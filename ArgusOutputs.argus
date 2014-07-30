@@ -15,7 +15,7 @@ Bat Current	mA	-400	-300	300	400
 none	-
 5V Current	mA	-1	-1	200	400
 3.3V Current	mA	-1	-1	200	400
-Vandy	-
-RSSI	dB	0	0	100	200
+Vandy Power	-
+Vandy Beacon	-
 Software Version	-
 State	-
