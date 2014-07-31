@@ -3,7 +3,6 @@ package argusTerminal;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.Point;
@@ -45,11 +44,14 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	public static final String UNIT_CELSIUS = "C";
 	public static final String UNIT_MILLIAMPS = "mA";
 	public static final String UNIT_VOLTS = "V";
-	
+	public static final String[] BINARYTEXT_ONOFF = {"off", "ON"};
+	public static final String[] BINARYTEXT_BINSEM = {"low", "HIGH"};
+	public static final int NUMBINSEMS = 4;
+
 	public static final int MAX_DATAPOINTS = 15;
 	private double[][] storedData = new double[MAX_NUMFIELDS][MAX_DATAPOINTS];
-//	private static int find;
-//	private Point p;
+	//	private static int find;
+	//	private Point p;
 	private JButton fakeButton = new JButton();	// Only exists to trigger actions
 	private HeliumTelemetry heliumTelem;
 	private HeliumConfig heliumConfig;
@@ -59,27 +61,27 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
 				"00FF8EFFFF0C0000765C000000FF901600 " +
 				"000000190 3F:7F:7F.00 3F/1F/20FF 031",
-//					"_UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
-		"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 1 FFFF " + 
-		"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
-		"00FF8EFFFF0C0000765C000000FF901600 " +
-		"000000200 3F:7F:7F.00 3F/1F/20FF 031",
-//					"_UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
-		"237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 0 FFFF " + 
-		"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
-		"00FF8EFFFF0C0000765C000000FF901600 " +
-		"000000210 3F:7F:7F.00 3F/1F/20FF 031",
-//					"_UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
-		"23E 314 3A1 3A4 312 3A1 3A0 315 230 311 3A3 324 315 1FC 31E 315 0 FFFF " + 
+				//					"_UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
+				"240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 1 FFFF " + 
 				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
 				"00FF8EFFFF0C0000765C000000FF901600 " +
-				"000000220 3F:7F:7F.00 3F/1F/20FF 031"
+				"000000200 3F:7F:7F.00 3F/1F/20FF 033",
+				//					"_UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
+				"237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 0 FFFF " + 
+				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+				"00FF8EFFFF0C0000765C000000FF901600 " +
+				"000000210 3F:7F:7F.00 3F/1F/20FF 039",
+				//					"_UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
+				"23E 314 3A1 3A4 312 3A1 3A0 315 230 311 3A3 324 315 1FC 31E 315 0 FFFF " + 
+				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+				"00FF8EFFFF0C0000765C000000FF901600 " +
+				"000000220 3F:7F:7F.00 3F/1F/20FF 03A"
 		};
 	public static final int VANDY_SPOT = 16;
 	public static final int HLMCONFIG_SPOT = 18;
 	public static final int HLMTLM_SPOT = 19;
 	public static final int CLOCK_SPOT = 20;
-//	public static final int RSSI_SPOT = 18;
+	//	public static final int RSSI_SPOT = 18;
 	public static final int VERSION_SPOT = 23;
 	protected StringBuffer stringBuffer;
 	public static final String[] outputFile = {
@@ -97,11 +99,11 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		// Start a Timer to parse the fake beacon every second
 		ao.runTestTimer();
 	}
-	
+
 	public void runTestTimer() {
 		Timer timer = new Timer(1000, new ActionListener() {
 			int i=0; 
-			
+
 			public void actionPerformed(ActionEvent e) {
 				receive(BEACON_TEST_STRING[i]);
 				i++;
@@ -156,43 +158,43 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			for(int i=0; (line = br.readLine())!= null; i++) {
 				// Split by tabs
 				String[] paramSplit = line.split("\t");
-//				JPanel panel1 = new JPanel();
+				//				JPanel panel1 = new JPanel();
 				names[i] = new String(paramSplit[0]);
 				JLabel name = new JLabel(names[i]);
 				name.setHorizontalAlignment(JLabel.RIGHT);
-//				panel1.add(name);
+				//				panel1.add(name);
 				displayPanel.add(name);
 				name.setForeground(Color.white);
 
-//				JPanel panel = new JPanel();
+				//				JPanel panel = new JPanel();
 				value[i] = new NumberTextField();
 				value[i].setForeground(Color.white);
 				value[i].setFont(new Font(Utils.typewriterFont(), Font.BOLD, 13));
 				value[i].setBackground(bgColor);
-//				panel.add(value[i]);
+				//				panel.add(value[i]);
 				displayPanel.add(value[i]);
 
-//				JPanel panel2 = new JPanel();
+				//				JPanel panel2 = new JPanel();
 				unit[i] = paramSplit[1];
 				JLabel label = new JLabel(unit[i]);
 				label.setHorizontalAlignment(JLabel.LEFT);
-//				panel2.add(label);
+				//				panel2.add(label);
 				displayPanel.add(label);
 				label.setForeground(Color.white);
-				
+
 				setNumberFormat(value[i], paramSplit[1]);
 
-//				JPanel jp = new JPanel();
+				//				JPanel jp = new JPanel();
 				JButton graph = new JButton("Graph");
 				graph.addActionListener(this);
 				graph.setActionCommand("Graph" + i);
-//				jp.add(graph);
+				//				jp.add(graph);
 				displayPanel.add(graph);
 
-//				panel1.setBackground(Color.DARK_GRAY);
-//				panel2.setBackground(Color.DARK_GRAY);
-//				Border loweredetched;
-//				loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
+				//				panel1.setBackground(Color.DARK_GRAY);
+				//				panel2.setBackground(Color.DARK_GRAY);
+				//				Border loweredetched;
+				//				loweredetched = BorderFactory.createEtchedBorder(EtchedBorder.LOWERED);
 				value[i].setBorder(BorderFactory.createEtchedBorder(EtchedBorder.LOWERED));
 
 				//Color Thresholds
@@ -219,6 +221,11 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		}
 	}
 
+	/** Convenience method for setting the format for telemetry fields.
+	 * 
+	 * @param ntf
+	 * @param unit
+	 */
 	public static void setNumberFormat(NumberTextField ntf, String unit) {
 		DecimalFormat df = FORMAT_DEFAULT;
 		if (unit.equals(UNIT_MILLIAMPS)) {
@@ -230,7 +237,7 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		}
 		ntf.setFormat(df);
 	}
-	
+
 	public static double hexToUnits(String hexData, String unit) {
 		// Grab each hex element and convert to integer
 		double val = -1;
@@ -251,74 +258,98 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		return(data);
 	}
 
+	/** Receive the given beacon string and parse it into telemetry elements.
+	 * 
+	 */
 	public void receive(String parseBeacon) {
 		// Clean up
 		parseBeacon.trim();
 		// Split on the whitespace
 		String[] beaconBits = parseBeacon.split(" ");
 		int rowCount = 0;
-		
+
 		// Try to parse; fail gracefully
 		try {
-		// Following Justin's original setup
-		// Except mission clock is first
-		value[rowCount++].setText(beaconBits[CLOCK_SPOT]);
-		// The next 16 elements are 2-bit hex
-		for(int i=1; i<17; i++){
-			// Grab each hex element and convert to integer
-			double convertedData = hexToUnits(beaconBits[i-1], unit[i]);
-			value[i].set(convertedData);
-			value[i].setForeground(sendTLCcolor(convertedData, i));
-			// Move the stored values over one column to make room for this data
-			for(int j=0; j < MAX_DATAPOINTS-1; j++) {
-				storedData[i][j]=storedData[i][j+1];
+			// Following Justin's original setup
+			// Except mission clock is first
+			value[rowCount++].setText(beaconBits[CLOCK_SPOT]);
+			// The next 16 elements are 2-bit hex
+			for(int i=1; i<17; i++){
+				// Grab each hex element and convert to integer
+				double convertedData = hexToUnits(beaconBits[i-1], unit[i]);
+				value[i].set(convertedData);
+				value[i].setForeground(sendTLCcolor(convertedData, i));
+				// Move the stored values over one column to make room for this data
+				for(int j=0; j < MAX_DATAPOINTS-1; j++) {
+					storedData[i][j]=storedData[i][j+1];
+				}
+				storedData[i][MAX_DATAPOINTS-1] = convertedData;
 			}
-			storedData[i][MAX_DATAPOINTS-1] = convertedData;
-		}
-		rowCount = 17;
-		// Next is the Vandy state
-		if (beaconBits[VANDY_SPOT].equals("1")) {
-			value[rowCount].setText("ON");
-			value[rowCount].setForeground(Color.green);
-		} else {
-			value[rowCount].setText("off");
-			value[rowCount].setForeground(Color.lightGray);			
-		}
-		rowCount++;
-		// Vandy data
-		value[rowCount++].setText(beaconBits[VANDY_SPOT+1]);
-		// Software version and state are split
-		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(0, 2));
-		value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(2));
-		
-		// Let the helium panels do their thing
-		heliumTelem.parseString(beaconBits[HLMTLM_SPOT]);
-		heliumConfig.parseString(beaconBits[HLMCONFIG_SPOT]);
+			rowCount = 17;
+			// Next is the Vandy state]
+			formatBinaryPanel(value[rowCount++], beaconBits[VANDY_SPOT], BINARYTEXT_ONOFF);
+			// Vandy data
+			value[rowCount++].setText(beaconBits[VANDY_SPOT+1]);
+			// Software version and state are split
+			value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(0, 2));
+			int binsemStates = Integer.parseInt(beaconBits[VERSION_SPOT].substring(2), 16);
+			String binsemStateString = Integer.toBinaryString(binsemStates);
+			while (binsemStateString.length() < NUMBINSEMS) {
+				binsemStateString = "0" + binsemStateString;
+			}
+			// Place them in the next sets
+			for (int i=0; i < NUMBINSEMS; i++) {
+				formatBinaryPanel(value[rowCount++], binsemStateString.substring(i, i+1), BINARYTEXT_BINSEM);				
+			}
+			
+			// Let the helium panels do their thing
+			heliumConfig.parseString(beaconBits[HLMCONFIG_SPOT]);
+			heliumTelem.parseString(beaconBits[HLMTLM_SPOT]);
+
 		} catch (StringIndexOutOfBoundsException sioobe) {
 			System.err.println("ArgusOutputPanel got stuck at " + rowCount + " from " + parseBeacon);
 		}
 		// Update all the active graphs
 		fakeButton.doClick();
-//		DrawGraph.redraw();
+		//		DrawGraph.redraw();
+	}
+	
+	/** Convenience method for setting the formats for binary telemetry values.
+	 * 
+	 * @param ntf
+	 * @param newValue
+	 * @param textOptions
+	 */
+	public static void formatBinaryPanel(NumberTextField ntf, String newValue, String[] textOptions ) {
+		int val = 0;
+		if (newValue.equals("1")) {
+			val = 1;
+			ntf.setForeground(Color.yellow);
+			ntf.setBackground(Color.green.darker());
+		} else {
+			ntf.setForeground(Color.lightGray);
+			ntf.setBackground(Color.black);
+		}
+		ntf.setText(textOptions[val]);
 	}
 
-	static int search(String line, String sym){
-		for(int i=0; i<line.length(); i++){
-			if (line.substring(i, i+1).equals(sym)){
-				return i;
-			}
-		}
-		return 0;
-	}
+	//	private static int search(String line, String sym){
+	//		for(int i=0; i<line.length(); i++){
+	//			if (line.substring(i, i+1).equals(sym)){
+	//				return i;
+	//			}
+	//		}
+	//		return 0;
+	//	}
 
-	static boolean check(String line, String sym){
-		for(int i=0; i<line.length(); i++){
-			if (line.substring(i, i+1).equals(sym)){
-				return true;
-			}
-		}
-		return false;
-	}
+	//	static boolean check(String line, String sym){
+	//		for(int i=0; i<line.length(); i++){
+	//			if (line.substring(i, i+1).equals(sym)){
+	//				return true;
+	//			}
+	//		}
+	//		return false;
+	//	}
 
 	public double sendArray(int i, int sensorID){
 		return storedData[sensorID][i];
@@ -356,8 +387,8 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			DrawGraph dg = new DrawGraph(this, sID, p, MAX_DATAPOINTS, 
 					names[sID] + " (" + unit[sID] + ")");
 			fakeButton.addActionListener(dg);
-//			p = DrawGraph.close();
-//			DrawGraph.newGraph(p, find);			
+			//			p = DrawGraph.close();
+			//			DrawGraph.newGraph(p, find);			
 		}
 	}
 }
