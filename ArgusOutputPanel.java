@@ -286,9 +286,15 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 				storedData[i][MAX_DATAPOINTS-1] = convertedData;
 			}
 			rowCount = 17;
-			// Next is the Vandy state]
-			formatBinaryPanel(value[rowCount++], beaconBits[VANDY_SPOT], BINARYTEXT_ONOFF);
-			// Vandy data
+			// Next is the Vandy status information. Three items together
+//			int vucHasPower = Integer.parseInt(beaconBits[VANDY_SPOT].substring(0, 1), 16);
+			formatBinaryPanel(value[rowCount++], beaconBits[VANDY_SPOT].substring(0, 1), 
+					BINARYTEXT_ONOFF);
+			// Next four characters are status
+			value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(1, 5));
+			// Next four are read
+			value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(5, 9));
+			// VUC Telemetry data
 			value[rowCount++].setText(beaconBits[VANDY_SPOT+1]);
 			// Software version and state are split
 			value[rowCount++].setText(beaconBits[VERSION_SPOT].substring(0, 2));
@@ -303,11 +309,26 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			}
 			
 			// Let the helium panels do their thing
-			heliumConfig.parseString(beaconBits[HLMCONFIG_SPOT]);
-			heliumTelem.parseString(beaconBits[HLMTLM_SPOT]);
+			// But first, there's this random FF that always shows up in the 11th
+			// spot
+			String fix = beaconBits[HLMCONFIG_SPOT].substring(0, 22) +
+					beaconBits[HLMCONFIG_SPOT].substring(24);
+			heliumConfig.parseString(fix);
+			fix = "";
+			for (int i=0; i < beaconBits[HLMTLM_SPOT].length()/2; i++) {
+				String bit = beaconBits[HLMTLM_SPOT].substring(2*i, 2*i+2);
+				if (!bit.equals("FF")) {
+					fix = fix + bit;					
+				}
+			}
+			heliumTelem.parseString(fix);
 
 		} catch (StringIndexOutOfBoundsException sioobe) {
-			System.err.println("ArgusOutputPanel got stuck at " + rowCount + " from " + parseBeacon);
+			System.err.println("ArgusOutputPanel got a StringIndex Error at " + rowCount + " from " + parseBeacon);
+		} catch (NumberFormatException nfe) {
+			System.err.println("ArgusOutputPanel got a NumberFormatException at " + rowCount + " from " + parseBeacon);
+		} catch (ArrayIndexOutOfBoundsException aioobe) {
+			System.err.println("ArgusOutputPanel got an ArrayIndexOutOfBoundsException at " + rowCount + " from " + parseBeacon);
 		}
 		// Update all the active graphs
 		fakeButton.doClick();
