@@ -1,4 +1,11 @@
 Mission Clock	sec
+Spacecraft ID	-
+Software Version	-
+Burn Circuit	-
+Clear to Send	-
+Ejected	-
+Deployed	-
+Frame ID	-
 none	-
 X+ Current	mA	-1	-1	200	201
 X+ Temp	C	-25	0	30	50
@@ -15,10 +22,9 @@ Bat Current	mA	-400	-300	300	400
 none	-
 5V Current	mA	-1	-1	200	400
 3.3V Current	mA	-1	-1	200	400
-Vandy Power	-
-Vandy Beacon	-
-Software Version	-
-Burn Circuit	-
-Clear to Send	-
-Ejected	-
-Deployed	-
+VUC Power	-
+VUC Run State	-
+VUC System Flag	-
+VUC Reset Count	-
+VUC Clock	-
+Real Time Clock	-

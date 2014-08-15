@@ -26,7 +26,7 @@ public class ArgusLogfileArchiver extends ClosingJFrame implements ActionListene
 	private static final long serialVersionUID = 1L;
 	public static String BEACON_EXTENSION = "argbraw";
 	public static String[] LOGFILE_EXTENSION = {"txt"};
-	public static String BEACON_START = "BEABEG";
+	public static String[] BEACON_START = {"BEABEG", "SLUBCN"};
 	public static String BEACON_END = "BEAEND";
 	protected JTextField logField, beacField;
 	protected JTextArea beacData;
@@ -82,14 +82,19 @@ public class ArgusLogfileArchiver extends ClosingJFrame implements ActionListene
 			while (br.ready()) {
 				String line = br.readLine();
 				System.out.println(line);
-				int bstart = line.indexOf(BEACON_START);
+				int beaconType = 0;
+				int bstart = -1;
+				while ((bstart < 0) || (beaconType < BEACON_START.length)) {
+					bstart = line.indexOf(BEACON_START[beaconType++]);
+				}
 				if (bstart >= 0) {
+					beaconType--;
 					int bend = line.indexOf(BEACON_END);
 					while (bend < 0) {
 						line = line + br.readLine();
 						bend = line.indexOf(BEACON_END);
 					}
-					String writeText = line.substring(bstart + BEACON_START.length(), bend) + "\n";
+					String writeText = line.substring(bstart + BEACON_START[beaconType].length(), bend) + "\n";
 					bw.write(writeText);
 					beacData.append(writeText);
 				}

@@ -8,7 +8,7 @@ public class ArgusInterpreter extends TNCinterpreter {
 	private StringBuffer beaconBuffer = new StringBuffer();
 	private StringBuffer textBuffer = new StringBuffer();
 	private boolean foundBeacon = false;
-	public static final String BEACON_START = "BEABEG ";
+	public static final String BEACON_START = "SLUBCN";
 	public static final String BEACON_END = "BEAEND";
 	
 
