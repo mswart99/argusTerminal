@@ -60,24 +60,25 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 		{"02070100 000000190 247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 325 317 " + 
 				"000050001004A000045A0 3F:7F:7F.00 3F/1F/20FF",
 				//					"_UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
-				"02070301 000000200 240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 " + 
-				"100070005040A000045AA 3F:7F:7F.00 3F/1F/20FF " + 
-				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5" +
+		"02070300 000000200 240 310 390 390 310 390 390 310 238 310 390 30C 308 1FF 310 307 " + 
+			"100070005040A000045AA 3F:7F:7F.00 3F/1F/20FF ",
+		"02070501 000000205 32C 004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5" +
 				"AABBCCDDEEFF0011223344556677889900",
 				//					"_UNKNOWN77 000000270 3F:7F:7F.00 3F/1F/20FF 031",
-				"02070502 000000210 237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 " + 
-				"000060002004A000045B4 3F:7F:7F.00 3F/1F/20FF " + 
-				"004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
-				"00FF8EFFFF0C0000765C000000FF901600 ",
+		"02070500 000000210 237 306 38D 38F 304 38C 37B 347 263 214 36B 3AC 3A8 1FF 300 3F7 " + 
+				"000060002004A000045B4 3F:7F:7F.00 3F/1F/20FF ",
+		"02070102 000000215 32C 004B010100006836020000FFAC0600415247555331534C55474E440500000040400101FFE5 " +
+				"008EFF0C0000765C000000901600 ",
 				//					"_UNKNOWN77 000000280 3F:7F:7F.00 3F/1F/20FF 031",
-				"02070500 000000220 23E 314 3A1 3A4 312 3A1 3A0 315 230 311 3A3 324 315 1FC 31E 315 " + 
+		"02070500 000000220 23E 314 3A1 3A4 312 3A1 3A0 315 230 311 3A3 324 315 1FC 31E 315 " + 
 				"100060002004A000045BE 3F:7F:7F.00 3F/1F/20FF"
 		};
 	public static final int NUM_ADC_CHANNELS = 16;
 	public static final int SC_HEADER_SPOT = 0;
 	public static final int VANDY_SPOT = NUM_ADC_CHANNELS + 2;
+	public static final int BATV_SPOT_IN_ADC = 11;	// Location of the battery data in the ADC array
 	public static final int RTC_SPOT = VANDY_SPOT + 1;
-	public static final int HLMCONFIG_SPOT = RTC_SPOT + 2;
+	public static final int HLMCONFIG_SPOT = 3;
 	public static final int HLMTLM_SPOT = HLMCONFIG_SPOT + 1;
 	public static final int CLOCK_SPOT = 1;
 	public static final int ADC_START_SPOT = 2;
@@ -289,58 +290,61 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			}
 			// And the frame
 			value[rowCount++].setText(beaconBits[SC_HEADER_SPOT].substring(6, 8));
-			// Save frameID for later
 			int frameID = Integer.parseInt(beaconBits[SC_HEADER_SPOT].substring(6,8), 16);
-			// The next NUM_ADC_CHANNELS elements are 2-bit hex
-			for(int i=0; i<NUM_ADC_CHANNELS; i++){
-				// Grab each hex element and convert to integer
-				double convertedData = hexToUnits(beaconBits[i+ADC_START_SPOT], unit[i+rowCount]);
-				value[i+rowCount].set(convertedData);
-				value[i+rowCount].setForeground(sendTLCcolor(convertedData, i+rowCount));
-				// Move the stored values over one column to make room for this data
-				for(int j=0; j < MAX_DATAPOINTS-1; j++) {
-					storedData[i+rowCount][j]=storedData[i+rowCount][j+1];
-				}
-				storedData[i+rowCount][MAX_DATAPOINTS-1] = convertedData;
-			}
-			rowCount = rowCount + NUM_ADC_CHANNELS;
-			/* Next is the Vandy status information, with number of bytes
-			 * 
-
- 
-			 */
-			//			int vucHasPower = Integer.parseInt(beaconBits[VANDY_SPOT].substring(0, 1), 16);
-			formatBinaryPanel(value[rowCount++], beaconBits[VANDY_SPOT].substring(0, 1), 
-					BINARYTEXT_ONOFF);
-			value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(1, 5));
-			value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(5, 9));
-			// Convert the reset count to an integer
-			value[rowCount++].set(Integer.parseInt(beaconBits[VANDY_SPOT].substring(9, 13), 16));
-			// Ditto for the clock
-			value[rowCount++].set(Integer.parseInt(beaconBits[VANDY_SPOT].substring(13, 21), 16));
-			// And the real-time clock rounds out frame 0. It's two elements
-			value[rowCount++].setText(beaconBits[RTC_SPOT] + " " + beaconBits[RTC_SPOT+1]);
+			
 			// The rest of what we do depends on the frame
 			switch (frameID) {
-				case 0: break;	// Nothing else is in frame 0
-				case 1:		// VUC data
-					// VUC is just telemetry, which we don't know what to do with, yet.
+			case 0: 
+				// The next NUM_ADC_CHANNELS elements are 2-bit hex
+				for(int i=0; i<NUM_ADC_CHANNELS; i++){
+					setADCdisplay(beaconBits[i+ADC_START_SPOT], i+rowCount);
+//					// Grab each hex element and convert to integer
+//					double convertedData = hexToUnits(beaconBits[i+ADC_START_SPOT], unit[i+rowCount]);
+//					value[i+rowCount].set(convertedData);
+//					value[i+rowCount].setForeground(sendTLCcolor(convertedData, i+rowCount));
+//					// Move the stored values over one column to make room for this data
+//					for(int j=0; j < MAX_DATAPOINTS-1; j++) {
+//						storedData[i+rowCount][j]=storedData[i+rowCount][j+1];
+//					}
+//					storedData[i+rowCount][MAX_DATAPOINTS-1] = convertedData;
+				}
+				rowCount = rowCount + NUM_ADC_CHANNELS;
+				/* Next is the Vandy status information, with number of bytes
+				 */
+				formatBinaryPanel(value[rowCount++], beaconBits[VANDY_SPOT].substring(0, 1), 
+						BINARYTEXT_ONOFF);
+				value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(1, 5));
+				value[rowCount++].setText(beaconBits[VANDY_SPOT].substring(5, 9));
+				// Convert the reset count to an integer
+				value[rowCount++].set(Integer.parseInt(beaconBits[VANDY_SPOT].substring(9, 13), 16));
+				// Ditto for the clock
+				value[rowCount++].set(Integer.parseInt(beaconBits[VANDY_SPOT].substring(13, 21), 16));
+				// And the real-time clock rounds out frame 0. It's two elements
+				value[rowCount++].setText(beaconBits[RTC_SPOT] + " " + beaconBits[RTC_SPOT+1]);
+				break;	// Nothing else is in frame 0
+			case 1:		// VUC data
+				// The battery data is here
+				setADCdisplay(beaconBits[2], 4+NUMBINSEMS+BATV_SPOT_IN_ADC);
+				// VUC is just telemetry, which we don't know what to do with, yet.
+				break;
+			case 2: 	// This is helium data
+				setADCdisplay(beaconBits[2], 4+NUMBINSEMS+BATV_SPOT_IN_ADC);
+				String fix = beaconBits[HLMCONFIG_SPOT].substring(0, 22) +
+						beaconBits[HLMCONFIG_SPOT].substring(24);
+				heliumConfig.parseString(fix);
+				if (beaconBits[HLMTLM_SPOT].substring(0, 2).equals("FF")) {
+					heliumTelem.parseString(beaconBits[HLMTLM_SPOT].substring(2));
 					break;
-				case 2: 	// This is helium data
-					// But first, there's this random FF that always shows up in the 11th
-					// spot
-					String fix = beaconBits[HLMCONFIG_SPOT].substring(0, 22) +
-							beaconBits[HLMCONFIG_SPOT].substring(24);
-					heliumConfig.parseString(fix);
-					fix = "";
-					for (int i=0; i < beaconBits[HLMTLM_SPOT].length()/2; i++) {
-						String bit = beaconBits[HLMTLM_SPOT].substring(2*i, 2*i+2);
-						if (!bit.equals("FF")) {
-							fix = fix + bit;					
-						}
-					}
-					heliumTelem.parseString(fix);
-					break;
+				}
+//				fix = "";
+//				for (int i=0; i < beaconBits[HLMTLM_SPOT].length()/2; i++) {
+//					String bit = beaconBits[HLMTLM_SPOT].substring(2*i, 2*i+2);
+//					if (!bit.equals("FF")) {
+//						fix = fix + bit;					
+//					}
+//				}
+				heliumTelem.parseString(beaconBits[HLMTLM_SPOT]);
+				break;
 			}
 
 		} catch (StringIndexOutOfBoundsException sioobe) {
@@ -431,5 +435,16 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 			//			p = DrawGraph.close();
 			//			DrawGraph.newGraph(p, find);			
 		}
+	}
+	
+	public void setADCdisplay(String adcText, int rowNum) {
+		double convertedData = hexToUnits(adcText, unit[rowNum]);
+		value[rowNum].set(convertedData);
+		value[rowNum].setForeground(sendTLCcolor(convertedData, rowNum));
+		// Move the stored values over one column to make room for this data
+		for(int j=0; j < MAX_DATAPOINTS-1; j++) {
+			storedData[rowNum][j]=storedData[rowNum][j+1];
+		}
+		storedData[rowNum][MAX_DATAPOINTS-1] = convertedData;
 	}
 }
