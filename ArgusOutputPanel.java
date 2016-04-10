@@ -46,7 +46,7 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	public static final String UNIT_VOLTS = "V";
 	public static final String[] BINARYTEXT_ONOFF = {"off", "ON"};
 	public static final String[] BINARYTEXT_BINSEM = {"low", "HIGH"};
-	public static final int NUMBINSEMS = 4;
+	public static final int NUMBINSEMS = 7;
 
 	public static final int MAX_DATAPOINTS = 15;
 	private double[][] storedData = new double[MAX_NUMFIELDS][MAX_DATAPOINTS];
@@ -55,8 +55,21 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	private JButton fakeButton = new JButton();	// Only exists to trigger actions
 	private HeliumTelemetry heliumTelem;
 	private HeliumConfig heliumConfig;
-
+	
 	public static final String[] BEACON_TEST_STRING = 
+		{"02080502 000000144 004B010100006836020000AC0600415247555331534C55474E440500000000000000 " 
+				+ "004BFF87 6C008EFF1200007578000000F017",
+		 "02080502 000001450 004B010100006836020000AC0600415247555331534C55474E440500000000000000 "
+				+ "004BFF87 FFC7118EFFB90000776E030000047F",
+		 "02080502 000002308 004B010100006836020000AC0600415247555331534C55474E440500000000000000 " 
+				+ "004BFF87 17138EFF090100746E03000038E6",
+		 "02080502 000000430 004B010100006836020000AC0600415247555331534C55474E440500000000000000 " 
+				+ "004BFF87 7B028EFF51000072220500001481",
+		 "02080502 000000716 004B010100006836020000AC0600415247555331534C55474E440500000000000000 " 
+				+ "004BFF87 23038EFF6C0000762205000020A4"
+		};
+
+	public static final String[] BEACON_TEST_STRING2 = 
 		{"02070100 000000190 247 316 39D 39F 314 39C 39B 317 233 314 39B 32C 318 1FF 325 317 " + 
 				"000050001004A000045A0 3F:7F:7F.00 3F/1F/20FF",
 				//					"_UNKNOWN77 000000260 3F:7F:7F.00 3F/1F/20FF 031",
@@ -78,8 +91,8 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 	public static final int VANDY_SPOT = NUM_ADC_CHANNELS + 2;
 	public static final int BATV_SPOT_IN_ADC = 11;	// Location of the battery data in the ADC array
 	public static final int RTC_SPOT = VANDY_SPOT + 1;
-	public static final int HLMCONFIG_SPOT = 3;
-	public static final int HLMTLM_SPOT = HLMCONFIG_SPOT + 1;
+	public static final int HLMCONFIG_SPOT = 2;
+	public static final int HLMTLM_SPOT = HLMCONFIG_SPOT + 2;
 	public static final int CLOCK_SPOT = 1;
 	public static final int ADC_START_SPOT = 2;
 	//	public static final int RSSI_SPOT = 18;
@@ -328,9 +341,10 @@ public class ArgusOutputPanel extends TNCoutputDisplay { // implements ActionLis
 				// VUC is just telemetry, which we don't know what to do with, yet.
 				break;
 			case 2: 	// This is helium data
-				setADCdisplay(beaconBits[2], 4+NUMBINSEMS+BATV_SPOT_IN_ADC);
-				String fix = beaconBits[HLMCONFIG_SPOT].substring(0, 22) +
-						beaconBits[HLMCONFIG_SPOT].substring(24);
+//				setADCdisplay(beaconBits[2], 4+NUMBINSEMS+BATV_SPOT_IN_ADC);
+				String fix = beaconBits[HLMCONFIG_SPOT]; //.substring(0, 22) +
+				System.out.println(fix);
+				//		beaconBits[HLMCONFIG_SPOT].substring(24);
 				heliumConfig.parseString(fix);
 				if (beaconBits[HLMTLM_SPOT].substring(0, 2).equals("FF")) {
 					heliumTelem.parseString(beaconBits[HLMTLM_SPOT].substring(2));
